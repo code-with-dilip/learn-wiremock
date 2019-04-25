@@ -1,6 +1,7 @@
 package com.learnwiremock.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.learnwiremock.domain.User;
@@ -11,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import wiremock.net.minidev.json.writer.JsonReader;
 
 import java.io.IOException;
@@ -93,7 +95,6 @@ public class UserServiceWireMockRuleTest {
         //Then
         assertEquals(12345,addedUser.getId().intValue());
     }
-
 
 
 }
