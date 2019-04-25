@@ -79,4 +79,28 @@ public void getUsers(){
 
         //Then
         assertEquals(12345,addedUser.getId().intValue());
-    }```
+    }
+```
+
+-    Stub for post call with a matching body.
+
+```
+@Test
+   public void addUser_withMatchingBody() throws IOException {
+
+       //Given
+       stubFor(WireMock.post(urlPathEqualTo(USER_URL))
+               .withRequestBody(equalTo(TestHelper.readFromPath("user_request.json"))) // request body is populated here
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))));
+       User user = objectMapper.readValue(TestHelper.readFromPath("user_request.json"),User.class);
+
+       //When
+       User addedUser = userService.addUser(user);
+
+       //Then
+       assertEquals(12345,addedUser.getId().intValue());
+   }
+
+```
