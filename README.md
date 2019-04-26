@@ -150,13 +150,13 @@ public void getUsers(){
 - When you have **dynamic values** then you can make use of **matchingJsonPath** to match each properties in the JSON.
 - The advantage with this one is that we can either check the value of each property or we can check whether the property is present.
 
-#### Checks just the property is present.
+#### Checks just the property is present
 
 ```
 withRequestBody(matchingJsonPath("uniqueId"))
 ```
 
-#### Checks the property is present with this give value.
+#### Checks the property is present with the give value
 ```
 withRequestBody(matchingJsonPath("name",equalTo("dilip")))
 ```
