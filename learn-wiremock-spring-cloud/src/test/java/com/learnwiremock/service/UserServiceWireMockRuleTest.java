@@ -8,6 +8,7 @@ import com.learnwiremock.domain.User;
 import com.learnwiremock.helper.TestHelper;
 import org.apache.http.HttpHeaders;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.learnwiremock.constants.WireMockConstants.ALL_USERS_URL;
+import static com.learnwiremock.constants.WireMockConstants.USER_ID_PATH_PARAM;
 import static com.learnwiremock.constants.WireMockConstants.USER_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -61,6 +63,10 @@ public class UserServiceWireMockRuleTest {
         assertEquals(3, userList.size());
     }
 
+    //TODO - Multiple Path Params
+
+    //TODO - Request Params
+
     @Test
     public void addUser() throws IOException {
 
@@ -79,6 +85,7 @@ public class UserServiceWireMockRuleTest {
     }
 
     @Test
+    @Ignore
     public void addUser_withMatchingBody() throws IOException {
 
         //Given
@@ -96,5 +103,51 @@ public class UserServiceWireMockRuleTest {
         assertEquals(12345,addedUser.getId().intValue());
     }
 
+    @Test
+    public void addUser_WithMultipleMappings_DuplicateCheck() throws IOException {
+
+        //Given
+        stubFor(WireMock.post(urlPathEqualTo(USER_URL))
+                .withRequestBody(equalTo(TestHelper.readFromPath("user_request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        stubFor(WireMock.get(urlPathEqualTo(USER_URL+"/123"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_request_withid.json"),User.class);
+
+        //When
+        User addedUser = userService.addUser(user);
+        assertEquals(12345,addedUser.getId().intValue());
+    }
+
+    @Test
+    public void addUser_WithDynamicValues() throws IOException {
+
+        //Given
+        stubFor(WireMock.post(urlPathEqualTo(USER_URL))
+                .withRequestBody(matchingJsonPath("id", equalTo(null)))
+                .withRequestBody(matchingJsonPath("name",equalTo("dilip")))
+                .withRequestBody(matchingJsonPath("age",equalTo("32")))
+                .withRequestBody(matchingJsonPath("uniqueId"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        stubFor(WireMock.get(urlPathEqualTo(USER_URL+"/.*"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_request.json"),User.class);
+
+        //When
+        User addedUser = userService.addUser(user);
+        assertEquals(12345,addedUser.getId().intValue());
+    }
 
 }

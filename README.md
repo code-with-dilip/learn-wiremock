@@ -37,9 +37,13 @@ final String baseUrl = String.format("http://localhost:%s", wireMockRule.port())
 
 ## Stubbing
 
-### GET http call
+### Creating a STUB
+
+#### GET http call
 
 - Stub for a get call. The below call matches the url and if the call is **GET** then it will return the below response.
+
+- Matching a **GET** call with the url Mapping and this can be done using  **urlPathEqualTo**.
 
 ```
 @Test
@@ -60,9 +64,11 @@ public void getUsers(){
 
 ```
 
-### POST Http Call
+#### POST Http Call
 
 - Stub for a post call. It matches the URL and it matches type of the http request
+
+- Matching a **POST** call with the url Mapping and this can be done using  **urlPathEqualTo**.
 ```
 @Test
     public void addUser() throws IOException {
@@ -82,7 +88,7 @@ public void getUsers(){
     }
 ```
 
--    Stub for post call with a matching body.
+- Matching a **POST** call with the url Mapping and the request body and this can be done using  **urlPathEqualTo**.
 
 ```
 @Test
@@ -104,3 +110,85 @@ public void getUsers(){
    }
 
 ```
+
+### Multiple Stub Matching
+
+- Matching a **POST** with multiple API calls. **Path Param** matching is done below.
+
+```
+@Test
+    public void addUser_WithMultipleMappings_DuplicateCheck() throws IOException {
+
+        //Given
+        stubFor(WireMock.post(urlPathEqualTo(USER_URL))
+                .withRequestBody(equalTo(TestHelper.readFromPath("user_request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        stubFor(WireMock.get(urlPathEqualTo(USER_URL+"{123}"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_request.json"),User.class);
+
+        //When
+        User addedUser = userService.addUser(user);
+        assertEquals(12345,addedUser.getId().intValue());
+    }
+```
+
+
+### NonDeterminism
+
+- Lets say you have a dynamic value in the request everytime a call is made.
+- Examples of dynamic values are:
+  - TimeStamp
+  - UUID
+
+- When you have **dynamic values** then you can make use of **matchingJsonPath** to match each properties in the JSON.
+- The advantage with this one is that we can either check the value of each property or we can check whether the property is present.
+- Checks just the property is present.
+
+```
+withRequestBody(matchingJsonPath("uniqueId"))
+```
+- Checks the property is present with this give value.
+```
+withRequestBody(matchingJsonPath("name",equalTo("dilip")))
+```
+- Url Path param with any value.
+
+```
+urlPathEqualTo(USER_URL+"/.*")
+```
+**Example 1**
+
+```
+@Test
+   public void addUser_WithDynamicValues() throws IOException {
+
+       //Given
+       stubFor(WireMock.post(urlPathEqualTo(USER_URL))
+               .withRequestBody(matchingJsonPath("id", equalTo(null)))
+               .withRequestBody(matchingJsonPath("name",equalTo("dilip")))
+               .withRequestBody(matchingJsonPath("age",equalTo("32")))
+               .withRequestBody(matchingJsonPath("uniqueId"))
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))));
+
+       stubFor(WireMock.get(urlPathEqualTo(USER_URL+"123"))
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))));
+
+       User user = objectMapper.readValue(TestHelper.readFromPath("user_request.json"),User.class);
+
+       //When
+       User addedUser = userService.addUser(user);
+       assertEquals(12345,addedUser.getId().intValue());
+   }
+
+```  

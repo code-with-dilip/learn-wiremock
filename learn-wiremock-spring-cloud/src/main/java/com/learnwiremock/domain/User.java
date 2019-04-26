@@ -5,6 +5,15 @@ public class User {
     private Integer id;
     private String name;
     private Integer age;
+    private String uniqueId;
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
+    }
 
     public Integer getId() {
         return id;
