@@ -30,7 +30,7 @@ public class UserService {
 
     public User addUser(User user) {
 
-        User exisingUser = userDuplicateCheck(user);
+        User exisingUser = getUserById(user.getId());
         if(exisingUser!=null){
             return exisingUser;
         }
@@ -44,10 +44,11 @@ public class UserService {
 
     }
 
-    public User userDuplicateCheck(User user){
 
-        if(user.getId()!=null) {
-            User user1 = webClient.get().uri(url+USER_URL+USER_ID_PATH_PARAM, user.getId())
+    public User getUserById(Integer id){
+
+        if(id!=null) {
+            User user1 = webClient.get().uri(url+USER_URL+USER_ID_PATH_PARAM, id)
                     .retrieve()
                     .bodyToMono(User.class)
                     .block();

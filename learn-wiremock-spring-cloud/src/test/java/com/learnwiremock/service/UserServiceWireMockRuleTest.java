@@ -138,7 +138,7 @@ public class UserServiceWireMockRuleTest {
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(TestHelper.readFromPath("user_response.json"))));
 
-        stubFor(WireMock.get(urlPathEqualTo(USER_URL+"/.*"))
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(TestHelper.readFromPath("user_response.json"))));
@@ -148,6 +148,23 @@ public class UserServiceWireMockRuleTest {
         //When
         User addedUser = userService.addUser(user);
         assertEquals(12345,addedUser.getId().intValue());
+    }
+
+    @Test
+    public void getUserById(){
+
+        //given
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        //when
+        User user = userService.getUserById(123);
+        User user1 = userService.getUserById(456);
+        //then
+        assertEquals(12345,user.getId().intValue());
+        assertEquals(12345,user1.getId().intValue());
     }
 
 }

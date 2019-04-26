@@ -164,9 +164,9 @@ withRequestBody(matchingJsonPath("name",equalTo("dilip")))
 #### Url Path param with any value using **regex**.
 
 ```
-urlPathEqualTo(USER_URL+"/.*")
+urlMatching(USER_URL+"/.*")
 ```
-**Example 1**
+**Example 1 - POST**
 
 ```
 @Test
@@ -195,3 +195,23 @@ urlPathEqualTo(USER_URL+"/.*")
    }
 
 ```  
+**Example 2 - GET - urlMatching**
+
+```
+@Test
+   public void getUserById(){
+
+       //given
+       stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))));
+
+       //when
+       User user = userService.getUserById(123);
+       User user1 = userService.getUserById(456);
+       //then
+       assertEquals(12345,user.getId().intValue());
+       assertEquals(12345,user1.getId().intValue());
+   }
+```
