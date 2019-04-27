@@ -167,4 +167,28 @@ public class UserServiceWireMockRuleTest {
         assertEquals(12345,user1.getId().intValue());
     }
 
+    @Test
+    public void getUserById_with_priority(){
+
+        //given
+        stubFor(WireMock.get(urlMatching(USER_URL+"/12345"))
+                .atPriority(1)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response-1.json"))));
+
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+                .atPriority(2)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        //when
+        User user = userService.getUserById(12345);
+        User user1 = userService.getUserById(34234);
+        //then
+        assertEquals(45678,user.getId().intValue());
+        assertEquals(12345,user1.getId().intValue());
+    }
+
 }

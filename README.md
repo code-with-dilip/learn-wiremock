@@ -215,3 +215,44 @@ urlMatching(USER_URL+"/.*")
        assertEquals(12345,user1.getId().intValue());
    }
 ```
+
+### Stub Prioritization
+
+- This comes in to picture when you have multiple stub matching for the same request.
+- By default the prority is set as zero. So when you have multiple stubs then the last stub will be selected.
+- We can assign a priority number for the request.
+  - Lower the priority number, higher the priority.
+  - Example:
+    - Priority value **1** is greater then priority value **2**.
+
+**Example 1**
+- In this example the URL pattern has a regex and a specific id.
+
+- By default the **regex** stub will be selected for any value that is sent without explicitly specifying the priority.
+  - To make it work we need to add the priority explicitly like the example below.
+```
+@Test
+    public void getUserById_with_priority(){
+
+        //given
+        stubFor(WireMock.get(urlMatching(USER_URL+"/12345"))
+                .atPriority(1)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response-1.json"))));
+
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+                .atPriority(2)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        //when
+        User user = userService.getUserById(12345);
+        User user1 = userService.getUserById(34234);
+
+        //then
+        assertEquals(45678,user.getId().intValue());
+        assertEquals(12345,user1.getId().intValue());
+    }
+```    
