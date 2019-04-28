@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.learnwiremock.domain.User;
 import com.learnwiremock.helper.TestHelper;
 import org.apache.http.HttpHeaders;
@@ -18,6 +19,7 @@ import wiremock.net.minidev.json.writer.JsonReader;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -190,5 +192,68 @@ public class UserServiceWireMockRuleTest {
         assertEquals(45678,user.getId().intValue());
         assertEquals(12345,user1.getId().intValue());
     }
+
+
+    @Test
+    public void deleteUser_with_verification(){
+
+        //given
+        stubFor(delete(urlMatching(USER_URL+"/.*"))
+                .willReturn(ok())
+        );
+
+        //when
+        userService.deleteUser(123);
+
+        //then
+        verify(deleteRequestedFor(urlMatching(USER_URL+"/.*")));
+
+
+    }
+
+    @Test
+    public void deleteMultipleUser_with_verification(){
+
+        //given
+        stubFor(delete(urlMatching(USER_URL+"/.*"))
+                .willReturn(ok())
+        );
+
+        //when
+        userService.deleteUsers(Arrays.asList(1,2));
+
+        //then
+        verify(exactly(2), deleteRequestedFor(urlMatching(USER_URL+"/.*")));
+
+
+    }
+
+    @Test
+    public void requestJournal(){
+
+        //given
+        stubFor(WireMock.get(urlMatching(USER_URL+"/12345"))
+                .atPriority(1)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response-1.json"))));
+
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+                .atPriority(2)
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))));
+
+        //when
+        User user = userService.getUserById(12345);
+        User user1 = userService.getUserById(34234);
+
+        final List<ServeEvent> allServeEvents = WireMock.getAllServeEvents();
+
+        //then
+        assertEquals(45678,user.getId().intValue());
+        assertEquals(12345,user1.getId().intValue());
+    }
+
 
 }

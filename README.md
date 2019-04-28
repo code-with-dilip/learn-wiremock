@@ -255,4 +255,107 @@ urlMatching(USER_URL+"/.*")
         assertEquals(45678,user.getId().intValue());
         assertEquals(12345,user1.getId().intValue());
     }
-```    
+```  
+
+## Verification
+
+- Verification is calling WireMock directly to verify the expected requests have been made to it directly.
+
+- The below code snippet makes sure that the call is made to the stub.
+
+```
+verify(deleteRequestedFor(urlMatching(USER_URL+"/.*"))); // This will make sure the stub was invoked.
+```
+
+```
+@Test
+   public void deleteUser_with_verification(){
+
+       //given
+       stubFor(delete(urlMatching(USER_URL+"/.*"))
+               .willReturn(ok())
+       );
+
+       //when
+       userService.deleteUser(123);
+
+       //then
+       verify(deleteRequestedFor(urlMatching(USER_URL+"/.*"))); // by default it checks the call was made once.
+
+
+   }
+```   
+
+### Verification Count
+
+- This is important to make sure that the given endpoint is invoked only **N** number of times.
+
+- The below call is going to make sure that the call is made exactly n number of times.
+
+```
+verify(exactly(2), deleteRequestedFor(urlMatching(USER_URL+"/.*")));
+```
+
+**Example**
+
+```
+@Test
+   public void deleteMultipleUser_with_verification(){
+
+       //given
+       stubFor(delete(urlMatching(USER_URL+"/.*"))
+               .willReturn(ok())
+       );
+
+       //when
+       userService.deleteUsers(Arrays.asList(1,2));
+
+       //then
+       verify(exactly(2), deleteRequestedFor(urlMatching(USER_URL+"/.*")));
+
+
+   }
+```
+
+## Request Journal
+
+- Wire Mock stores all the request and response in a request Journal.
+- Request Journal is an in memory commit log of every single request and response made to wire mock.
+
+- The below code snippet gives access to all of the Server Events that are stubbed for the given test.
+
+```
+final List<ServeEvent> allServeEvents = WireMock.getAllServeEvents();
+```
+- You can use the **debug + evaluate** option in the **IntelliJ** to see whats the response from the above call.
+
+**Example**
+
+```
+@Test
+   public void requestJournal(){
+
+       //given
+       stubFor(WireMock.get(urlMatching(USER_URL+"/12345"))
+               .atPriority(1)
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response-1.json"))));
+
+       stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+               .atPriority(2)
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))));
+
+       //when
+       User user = userService.getUserById(12345);
+       User user1 = userService.getUserById(34234);
+
+       final List<ServeEvent> allServeEvents = WireMock.getAllServeEvents(); // gives you access to all of the request Journal
+
+       //then
+       assertEquals(45678,user.getId().intValue());
+       assertEquals(12345,user1.getId().intValue());
+   }
+```

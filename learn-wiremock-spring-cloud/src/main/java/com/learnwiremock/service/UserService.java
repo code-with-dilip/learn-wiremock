@@ -58,4 +58,20 @@ public class UserService {
         return null;
 
     }
+
+    public void deleteUser(int id) {
+
+        webClient.delete().uri(url+USER_URL+USER_ID_PATH_PARAM, id)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+
+    }
+
+    public void deleteUsers(List<Integer> idList) {
+
+        idList.forEach((id -> {
+            deleteUser(id);
+        }));
+    }
 }
