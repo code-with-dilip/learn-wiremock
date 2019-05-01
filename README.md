@@ -359,3 +359,158 @@ final List<ServeEvent> allServeEvents = WireMock.getAllServeEvents();
        assertEquals(12345,user1.getId().intValue());
    }
 ```
+
+## Running WireMock as StandAlone
+
+- Check this section in **PluralSight** it really explained very well.
+
+### How to run it as standalone?
+
+```
+java -jar wiremock-standalone-2.23.2.jar
+```
+
+- Go to the below link to access the local instance of running wire mock.
+
+```
+http://localhost:8080/__admin/docs
+```
+
+## Recording and Proxying
+
+- Recording is the concept where the the call will be actually made to the API having **wiremock** in between recording the API interactions.
+
+### Why record an API ?
+
+- Stub Accuracy.
+- Manual Stub creations may be prone to error.
+- Stub creation will be faster.
+
+### Recording the wiremock using UI
+- Start up the wiremock stand alone in your local.
+
+- Go to the below link.
+
+```
+http://localhost:8080/__admin/recorder/
+```
+
+- In the **Target URL** provide the below url and click on the **Record** button.
+
+```
+https://www.pluralsight.com
+```
+
+- Type in **loclhost:8080** , this will take you to the pluralsight website. By then all the rest api calls thats made in that screen would have been captured by the Wiremock.
+
+- Click on the stop button and the a message of number of stubs that are recorded will be displayed.
+
+- The one advantage of doing this will help avoid the manual effort of building these stubs.
+
+### Recording using the WireMock - Code
+
+- If you add the below piece of code in the test case then this takes care of recording the request and response stubs for you.
+- But to generate the stubs you need to actually connect to the api and have the below code enabled it takes care of capturing the stubs and the recorded stubs will be stored in the **src/test/resources/mappings** folder.
+- Check the m5 and d2 in the pluralsight code base.
+
+```
+@Before
+public void startRecording() {
+    WireMock.startRecording("http://localhost:8081");
+}
+
+@After
+public void stopRecording() {
+    WireMock.stopRecording();
+}
+```
+
+### Selective Proxying
+
+- In general we have different types of endpoints.
+  - deterministic endpoints
+  - nondeterministic endpoints
+  - notimplemested endpoints.
+  - Never happen endpoints in SandBox environment.
+
+#### Selective Proxying setUp
+
+- If there are no stub set up available in the test method then the below call will invoke the actual service thats running in the below address.
+- For the below example , it connects to localhost and the port it runs against is **8081**.
+
+```
+stubFor(any(anyUrl()).willReturn(aResponse().proxiedFrom("http://localhost:8081")));
+```
+- Running a stub for the endpoint thats not proxied can be run by using the below set up.
+
+```
+@Test
+public void updateUser() throws IOException {
+
+    stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+            .willReturn(WireMock.aResponse()
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(TestHelper.readFromPath("user_update_response.json"))));
+
+
+    User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+    User updatedUser = userService.updateUser(user);
+    assertEquals(33,updatedUser.getAge().intValue());
+
+}
+```
+
+## Fault Simulation
+
+- We need to always have the failure scenarios covered as this might happen in the real environment.
+
+- Some of the HTTP Errors are listed below.
+  - Timeouts and Latency
+  - Server Error
+  - Invalid Response
+- **Wiremock** comes in handy under these scenarios to simulate the responses.
+
+### Error Simulation
+
+**Example 1:**
+
+- Calling the **serverError()** method will return the 500 response.
+
+```
+stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(serverError()));
+```
+**Example 2:**
+
+- We can return **Fault** also to simulate the error response.
+
+```
+@Test(expected = Exception.class)
+    public void updateUser_withFault() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))); // returns server error with no body.
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+
+    }
+```
+**Example 3:**
+
+- Using the Fault object to simulate the **CONNECTION_RESET_BY_PEER**.
+
+```
+@Test(expected = Exception.class)
+    public void updateUser_withFault_connectionreset() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER))); // returns server error with no body.
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+
+    }
+```

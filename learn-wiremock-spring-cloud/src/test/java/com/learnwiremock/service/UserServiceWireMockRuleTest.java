@@ -3,6 +3,7 @@ package com.learnwiremock.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.learnwiremock.domain.User;
@@ -46,6 +47,8 @@ public class UserServiceWireMockRuleTest {
     }
 
     private void wireMockStubs() {
+
+        stubFor(any(anyUrl()).willReturn(aResponse().proxiedFrom("http://localhost:8081")));
     }
 
 
@@ -254,6 +257,72 @@ public class UserServiceWireMockRuleTest {
         assertEquals(45678,user.getId().intValue());
         assertEquals(12345,user1.getId().intValue());
     }
+
+
+    @Test
+    public void updateUser() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_update_response.json"))));
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+        assertEquals(33,updatedUser.getAge().intValue());
+
+    }
+
+    @Test(expected = WebClientResponseException.class)
+    public void updateUser_faultSimulation_serverError() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(serverError())); // returns server error with no body.
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+
+    }
+
+    @Test(expected = Exception.class)
+    public void updateUser_withFault() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))); // returns server error with no body.
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+
+    }
+
+    @Test(expected = Exception.class)
+    public void updateUser_withFault_connectionreset() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER))); // returns server error with no body.
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+
+    }
+
+
+    @Test(expected = WebClientResponseException.class)
+    public void updateUser_faultSimulation_badRequest() throws IOException {
+
+        stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
+                .willReturn(badRequest()));
+
+
+        User user = objectMapper.readValue(TestHelper.readFromPath("user_update_request.json"),User.class);
+        User updatedUser = userService.updateUser(user);
+
+    }
+
 
 
 }
