@@ -514,3 +514,5 @@ stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
 
     }
 ```
+
+### Latency Simulation

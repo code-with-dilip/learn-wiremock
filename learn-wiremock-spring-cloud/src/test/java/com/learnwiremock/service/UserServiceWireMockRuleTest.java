@@ -323,6 +323,43 @@ public class UserServiceWireMockRuleTest {
 
     }
 
+    @Test
+    public void getUserById_withFixedDelay(){
+
+        //given
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))
+                .withFixedDelay(1000)));//this gives a delay of 100ms
+
+        //when
+        User user = userService.getUserById(123);
+        User user1 = userService.getUserById(456);
+        //then
+        assertEquals(12345,user.getId().intValue());
+        assertEquals(12345,user1.getId().intValue());
+    }
+
+    @Test
+    public void getUserById_withRandomDelay(){
+
+        //given
+        stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("user_response.json"))
+                        .withUniformRandomDelay(10, 1000)));//this gives a delay of 100ms
+
+        //when
+        User user = userService.getUserById(123);
+        User user1 = userService.getUserById(456);
+        //then
+        assertEquals(12345,user.getId().intValue());
+        assertEquals(12345,user1.getId().intValue());
+    }
+
+
 
 
 }
