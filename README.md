@@ -516,3 +516,223 @@ stubFor(WireMock.put(urlMatching(USER_URL+"/.*"))
 ```
 
 ### Latency Simulation
+
+**withFixedDelay** - This function simulates the delay with the given time.
+```
+@Test
+   public void getUserById_withFixedDelay(){
+
+       //given
+       stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))
+               .withFixedDelay(1000)));//this gives a delay of 100ms
+
+       //when
+       User user = userService.getUserById(123);
+       User user1 = userService.getUserById(456);
+       //then
+       assertEquals(12345,user.getId().intValue());
+       assertEquals(12345,user1.getId().intValue());
+   }
+
+```
+**withUniformRandomDelay** - This function simulates the delay between the values mentioned in the arguments.
+```
+   @Test
+   public void getUserById_withRandomDelay(){
+
+       //given
+       stubFor(WireMock.get(urlMatching(USER_URL+"/.*"))
+               .willReturn(WireMock.aResponse()
+                       .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                       .withBody(TestHelper.readFromPath("user_response.json"))
+                       .withUniformRandomDelay(10, 1000)));//this gives a delay of 100ms
+
+       //when
+       User user = userService.getUserById(123);
+       User user1 = userService.getUserById(456);
+       //then
+       assertEquals(12345,user.getId().intValue());
+       assertEquals(12345,user1.getId().intValue());
+   }
+```
+
+## HTTPS with WireMock
+
+### How HTTPS Works ?
+
+- Watch this video to understand more on how https works.
+  - https://www.youtube.com/watch?v=iQsKdtjwtYI
+
+  - https://www.khanacademy.org/computing/computer-science/internet-intro/internet-works-intro/v/the-internet-encryption-and-public-keys
+
+### Configure the wiremock to run in a HTTPS port.
+
+- Configuring the JUNIT rule to run against it.
+
+```
+@Rule
+public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().httpsPort(8443));
+```
+
+- Setting up the url to run against the https port and **https** instead of **http**
+
+```
+final String baseUrl = String.format("https://localhost:%s", wireMockRule.port());
+```
+
+#### Exploring the privatekey and publickey of wiremock
+
+- Unzip the **wiremock-stand-alone** jar file. You will find a keystore file which has the selfsigned certificate.
+
+- Using the java **keytool** command we will look in to the certificate.
+  - No password is necessary.
+```
+keytool -list -keystore keystore
+```
+- You will get the below result after the above command run.
+
+- You see that we have a private key entry to decrypt the traffic.
+
+```
+Keystore type: jks
+Keystore provider: SUN
+
+Your keystore contains 1 entry
+
+wiremock, Feb 24, 2015, PrivateKeyEntry,
+Certificate fingerprint (SHA1): 6F:B3:CC:4F:53:F3:89:4C:70:6F:CC:1D:43:F4:EA:B3:55:F0:AD:95
+
+Warning:
+The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using "keytool -importkeystore -srckeystore keystore -destkeystore keystore -deststoretype pkcs12".
+```
+
+- Lets create the public key.  The below command will create the **wiremock.crt** file which has the **OWNER** and **ISSUER** details.
+
+```
+keytool -exportcert -alias wiremock -file wiremock.crt -keystore keystore
+```
+- Run the below command to see whats inside the **crt** file.
+
+```
+keytool -printcert -file wiremock.crt
+```
+
+- You will get the below result for the above command.
+
+```
+Owner: CN=Tom Akehurst, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown
+Issuer: CN=Tom Akehurst, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown
+Serial number: 1d892e4f
+Valid from: Tue Feb 24 07:58:50 CST 2015 until: Thu Jan 31 07:58:50 CST 2115
+Certificate fingerprints:
+	 MD5:  A8:CB:72:1E:19:E2:3D:A1:D1:80:9C:E8:08:48:04:B3
+	 SHA1: 6F:B3:CC:4F:53:F3:89:4C:70:6F:CC:1D:43:F4:EA:B3:55:F0:AD:95
+	 SHA256: 66:02:81:F6:DD:F9:C1:DE:66:21:10:8B:69:A9:85:42:9A:5B:CE:17:9A:4A:6C:F4:89:59:A1:BD:A6:E1:9C:31
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions:
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 36 7A B2 85 D1 C4 3F CD   DA 7E 5B FB E0 95 AD 66  6z....?...[....f
+0010: EB 5C B2 96                                        .\..
+]
+]
+```
+
+- Creating the **client-truststore.jks** file.
+
+```
+keytool -import -file wiremock.crt -alias wiremock -keystore /Users/z001qgd/Dilip/study/wiremock/codebase/learn-wiremock-spring-cloud/src/test/resources/cert/client-truststore.jks
+```
+
+### Self Signing the certificates
+
+#### Generating our OWN certificate
+
+- This is to generate our own certificate and use it instead of the one thats available in the jar file.
+
+- The below command is used to generate a new certificate and this can be used for authentication. The below command will create a file named **wiremock-keystore.jks**.
+
+```
+keytool -genkey -keyalg RSA -alias wiremock -keystore wiremock-keystore.jks
+```
+- You will get the below result after you run that command.
+
+```
+Enter keystore password:
+Re-enter new password:
+What is your first and last name?
+  [Unknown]:  localhost
+What is the name of your organizational unit?
+  [Unknown]:  Authors
+What is the name of your organization?
+  [Unknown]:  Pluralsight
+What is the name of your City or Locality?
+  [Unknown]:  Minneapolis
+What is the name of your State or Province?
+  [Unknown]:  MN
+What is the two-letter country code for this unit?
+  [Unknown]:  US
+Is CN=localhost, OU=Authors, O=Pluralsight, L=Minneapolis, ST=MN, C=US correct?
+  [no]:  yes
+
+Enter key password for <wiremock>
+	(RETURN if same as keystore password):
+Re-enter new password:
+```
+
+#### Generating the public key from wiremock-keystore.jks
+
+- The below command generates the **wiremock-new.crt** file and it stores the certificate in that file.
+```
+keytool -exportcert -alias wiremock -file wiremock-new.crt -keystore wiremock-keystore.jks
+```
+- You will get the below result after you run that command.
+
+```
+Enter keystore password:
+Certificate stored in file <wiremock-new.crt>
+
+Warning:
+The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using "keytool -importkeystore -srckeystore wiremock-keystore.jks -destkeystore wiremock-keystore.jks -deststoretype pkcs12".
+```
+
+- Now its time to trust it.
+
+```
+keytool -import -file wiremock-new.crt -alias wiremock -keystore client-truststore.jks
+```
+- You will get the below result after you run that command. As you can see that we have Owner and Issuer matches with the one that was present when the actual certificate was generated.
+
+```
+Owner: CN=localhost, OU=Authors, O=Pluralsight, L=Minneapolis, ST=MN, C=US
+Issuer: CN=localhost, OU=Authors, O=Pluralsight, L=Minneapolis, ST=MN, C=US
+Serial number: 6af7bda
+Valid from: Fri May 03 06:56:24 CDT 2019 until: Thu Aug 01 06:56:24 CDT 2019
+Certificate fingerprints:
+	 MD5:  68:0F:B7:41:93:04:11:75:4F:E5:20:B0:88:3A:C9:0C
+	 SHA1: 5A:2A:21:0E:46:15:22:53:3D:04:D2:C4:E2:95:13:7C:12:76:94:69
+	 SHA256: 4A:17:AD:7A:E8:45:79:11:BF:FA:1A:63:1F:2E:56:12:5D:FF:64:02:22:7C:D5:50:44:0B:87:A3:AA:CC:51:F0
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions:
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: A9 84 FB C3 02 FE 25 F6   F8 89 FF 4C B9 94 6C 50  ......%....L..lP
+0010: 59 A1 E3 66                                        Y..f
+]
+]
+
+Trust this certificate? [no]:  yes
+```
