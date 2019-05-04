@@ -85,7 +85,7 @@ public class UserServiceWireMockRuleHTTPSTest {
          */
         trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
         trustStore.load(new FileInputStream(ResourceUtils.getFile(
-                "classpath:cert/client-truststore.jks")), trustStorePass.toCharArray());
+                "classpath:cert/wiremock-truststore.jks")), trustStorePass.toCharArray());
         System.out.println("Aliases are : " + trustStore.aliases());
         /**
          * keystore

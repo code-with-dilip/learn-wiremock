@@ -768,3 +768,53 @@ public WireMockRule wireMockRule = new WireMockRule(wireMockConfig()
 ```
 
 - Refer to this class **UserServiceWireMockRuleHTTPSSelfSignTest** for a complete understanding.
+
+### Client Authentication
+- The following files will be generated as part of the client Authentication.
+  - wiremockclient-keystore.jks
+  - wiremockclient-new.crt
+  - wiremockclient-truststore.jks
+
+- Generate a **client-keystore.jks** first for this purpose. The below command will generate a client keystore file.
+
+```
+keytool -genkey -keyalg RSA -alias client -keystore wiremockclient-keystore.jks
+
+```
+- Generating the public key from wiremockclient-keystore.jks.
+
+```
+keytool -exportcert -alias client -file wiremockclient-new.crt -keystore wiremockclient-keystore.jks
+```
+
+- Create a trustStore that will be used by the WireMockServer.
+
+```
+keytool -import -file wiremockclient-new.crt -alias client -keystore wiremockclient-truststore.jks
+```
+
+#### Set for Test case for the Client Authentication.
+
+- Setting up wire mock to validate client certificates.
+  - You need trustStorePath, trustStorePassword and needClientAuth.
+
+```
+@Rule
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig()
+            .httpsPort(8443)
+            .keystorePath("src/test/resources/cert/wiremock-keystore.jks")
+            .keystorePassword("password")
+            .trustStorePath("src/test/resources/cert/wiremockclient-truststore.jks")
+            .trustStorePassword("password")
+            .needClientAuth(true));
+```
+
+- In the SSLContext we need to set up the **keymanager** to make it work.
+- Check the **UserServiceWireMockRuleHTTPSSelfSignClientAuthTest** class.
+
+```
+SslContext sslContext = SslContextBuilder.forClient()
+               .keyManager(privateKey, password, x509CertificateChain)
+               .trustManager(trustCertificates)
+               .build();
+```

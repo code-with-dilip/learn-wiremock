@@ -6,7 +6,6 @@ import com.learnwiremock.domain.User;
 import com.learnwiremock.helper.TestHelper;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.apache.http.HttpHeaders;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,16 +16,14 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,21 +34,24 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static com.learnwiremock.constants.WireMockConstants.ALL_USERS_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UserServiceWireMockRuleHTTPSSelfSignTest {
+public class UserServiceWireMockRuleHTTPSSelfSignClientAuthTest {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(wireMockConfig()
             .httpsPort(8443)
             .keystorePath("src/test/resources/cert/wiremock-keystore.jks")
-            .keystorePassword("password"));
+            .keystorePassword("password")
+            .trustStorePath("src/test/resources/cert/wiremockclient-truststore.jks")
+            .trustStorePassword("password")
+            .needClientAuth(true)
+            );
+
     private UserService userService;
     WebClient webClient;
 
-
     @Before
-    public void setUp() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    public void setUp() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, UnrecoverableKeyException {
         final String baseUrl = String.format("https://localhost:%s", 8443);
-
         SslContext sslContext = buildSSlContext();
         HttpClient httpClient = HttpClient.create()
                 .secure(t -> t.sslContext(sslContext));
@@ -78,26 +78,49 @@ public class UserServiceWireMockRuleHTTPSSelfSignTest {
         assertEquals(3, userList.size());
     }
 
-    public SslContext buildSSlContext() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public SslContext buildSSlContext() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException {
 
-        final KeyStore trustStore;
-        final KeyStore keyStore;
-        String trustStorePass = "password";
-        /**
-         * truststore
-         */
-        trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        trustStore.load(new FileInputStream(ResourceUtils.getFile(
-                "classpath:cert/wiremock-truststore.jks")), trustStorePass.toCharArray());
-        System.out.println("Aliases are : " + trustStore.aliases());
-        List<Certificate> certificateList = getCertificateList(trustStore);
-        final X509Certificate[] certificates = certificateList.toArray(new X509Certificate[certificateList.size()]);
+        final KeyStore trustStore = null;
+        KeyStore keyStore = null;
+        String password = "password";
+        String keyAlias = "client";
+        final PrivateKey privateKey;
+        keyStore = buildKeyStore(keyStore, password);
+        List<Certificate> clientCertificateList = buiildTrustStoreCerts(trustStore, password);
+        final X509Certificate[] trustCertificates = clientCertificateList.toArray(new X509Certificate[clientCertificateList.size()]);
+        privateKey = (PrivateKey) keyStore.getKey(keyAlias, password.toCharArray());
+        X509Certificate[] x509CertificateChain = getx509CertificateChain(keyStore, keyAlias);
         SslContext sslContext = SslContextBuilder.forClient()
-                //.trustManager(InsecureTrustManagerFactory.INSTANCE)
-                .trustManager(certificates)
+                .keyManager(privateKey, password, x509CertificateChain)
+                .trustManager(trustCertificates)
                 .build();
         return sslContext;
 
+    }
+
+    public X509Certificate[] getx509CertificateChain(KeyStore keyStore, String keyAlias) throws KeyStoreException {
+        Certificate[] certChain = keyStore.getCertificateChain(keyAlias);
+        X509Certificate[] x509CertificateChain = Arrays.stream(certChain)
+                .map(certificate -> (X509Certificate) certificate)
+                .collect(Collectors.toList())
+                .toArray(new X509Certificate[certChain.length]);
+
+        return x509CertificateChain;
+    }
+
+    public List<Certificate> buiildTrustStoreCerts(KeyStore trustStore, String password) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        trustStore.load(new FileInputStream(ResourceUtils.getFile(
+                "classpath:cert/wiremock-truststore.jks")), password.toCharArray());
+        return getCertificateList(trustStore);
+
+    }
+
+    public KeyStore buildKeyStore(KeyStore keyStore, String password) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+        keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(new FileInputStream(ResourceUtils.getFile(
+                "classpath:cert/wiremockclient-keystore.jks")), password.toCharArray());
+        return keyStore;
     }
 
     List<Certificate> getCertificateList(KeyStore trustStore) throws KeyStoreException {
