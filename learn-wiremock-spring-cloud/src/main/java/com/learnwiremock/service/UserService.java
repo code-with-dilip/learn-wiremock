@@ -2,7 +2,9 @@ package com.learnwiremock.service;
 
 import com.learnwiremock.domain.User;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,6 +80,19 @@ public class UserService {
         return webClient.put().uri(url+USER_URL+USER_ID_PATH_PARAM, user.getId().intValue())
                 .retrieve()
                 //.onStatus(HttpStatus::is4xxClientError, (clientResponse -> ))
+                .bodyToMono(User.class)
+                .block();
+    }
+
+    public User getUserByName(String name) {
+
+        URI uri = UriComponentsBuilder.fromUriString(url+USER_URL)
+                .queryParam("name",name)
+                .buildAndExpand()
+                .toUri();
+        System.out.println("uri : " + uri);
+        return webClient.get().uri(uri)
+                .retrieve()
                 .bodyToMono(User.class)
                 .block();
     }

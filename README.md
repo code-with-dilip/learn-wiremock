@@ -818,3 +818,17 @@ SslContext sslContext = SslContextBuilder.forClient()
                .trustManager(trustCertificates)
                .build();
 ```
+
+
+## Templating and Stateful Behavior
+
+- Templating in wiremock is a concept where you can dynamically compose the responses based on the request. This can be done by using WirteMock Templating Engine.
+
+- Templating is achieved by using **{{}}**.
+- WireMock makes use of a templating library called **HandleBars** java.
+-
+
+### Why State?
+
+- WireMock has the state machine in built to it in order to support this functionality.
+- 
