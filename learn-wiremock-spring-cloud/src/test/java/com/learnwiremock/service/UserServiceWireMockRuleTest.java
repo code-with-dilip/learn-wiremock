@@ -68,6 +68,19 @@ public class UserServiceWireMockRuleTest {
         assertEquals(3, userList.size());
     }
 
+    @Test
+    public void getUsers_nonBlocking(){
+
+        //Given
+        stubFor(WireMock.get(urlPathEqualTo(ALL_USERS_URL))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(TestHelper.readFromPath("multiple_users_response.json"))));
+
+        //When
+         userService.getUsers_nonBlocking();
+    }
+
     //TODO - Multiple Path Params
 
     //TODO - Request Params

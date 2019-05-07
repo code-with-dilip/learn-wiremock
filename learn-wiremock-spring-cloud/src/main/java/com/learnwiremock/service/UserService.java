@@ -3,6 +3,7 @@ package com.learnwiremock.service;
 import com.learnwiremock.domain.User;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 
 import java.net.URI;
 import java.util.List;
@@ -28,6 +29,15 @@ public class UserService {
                 .collectList()
                 .block();
     }
+
+    public void getUsers_nonBlocking(){
+        Flux<User> userFlux =  webClient.get().uri(url+ ALL_USERS_URL)
+                .retrieve()
+                .bodyToFlux(User.class);
+
+        userFlux.subscribe((user -> System.out.println("User is : "+ user)));
+    }
+
 
     public User addUser(User user) {
 

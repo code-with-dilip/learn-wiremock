@@ -826,9 +826,10 @@ SslContext sslContext = SslContextBuilder.forClient()
 
 - Templating is achieved by using **{{}}**.
 - WireMock makes use of a templating library called **HandleBars** java.
--
+
+- Check the **available-flights.json** file in the project thats shared. It has the required details that are necessary to understand how this works in general.
 
 ### Why State?
 
 - WireMock has the state machine in built to it in order to support this functionality.
-- 
+-
