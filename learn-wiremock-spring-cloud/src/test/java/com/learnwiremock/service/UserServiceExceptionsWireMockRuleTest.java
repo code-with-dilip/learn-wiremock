@@ -8,11 +8,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.retry.RetryExhaustedException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.learnwiremock.constants.WireMockConstants.USER_URL;
-import static org.junit.Assert.assertEquals;
 
 public class UserServiceExceptionsWireMockRuleTest {
 

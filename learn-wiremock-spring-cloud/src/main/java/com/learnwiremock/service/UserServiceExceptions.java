@@ -125,6 +125,13 @@ public class UserServiceExceptions {
                 .buildAndExpand()
                 .toUri();
 
+        Retry<?> retry = Retry.anyOf(WebClientResponseException.class)
+                .exponentialBackoff(Duration.ofSeconds(intialBackOff), Duration.ofSeconds(maxBackOff))
+                .retryMax(3)
+                .doOnRetry((exception) -> {
+                    log.error("The exception is : " + exception);
+                });
+
         try {
             return webClient.get().uri(uri)
                     .retrieve()
@@ -132,13 +139,7 @@ public class UserServiceExceptions {
                     .doOnError((e) -> {
                         log.error("Exception in the doOnError : " + e);
                     })
-                    .retryWhen(Retry.anyOf(WebClientResponseException.class)
-                            .exponentialBackoff(Duration.ofSeconds(intialBackOff), Duration.ofSeconds(maxBackOff))
-                            .retryMax(3)
-                            .doOnRetry((exception) -> {
-                                log.error("The exception is : " + exception);
-                            })
-                    )
+                    .retryWhen(retry)
                     .block();
         } catch (RetryExhaustedException e) {
             log.error("RetryExhaustedException is : " + e);
