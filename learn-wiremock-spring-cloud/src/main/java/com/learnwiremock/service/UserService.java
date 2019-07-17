@@ -3,9 +3,13 @@ package com.learnwiremock.service;
 import com.learnwiremock.domain.User;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,4 +110,5 @@ public class UserService {
                 .bodyToMono(User.class)
                 .block();
     }
+
 }
