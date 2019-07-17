@@ -71,4 +71,6 @@ public class UseWireMockRuleTemplatingTest {
         //then
         assertEquals(name, user.getName());
     }
+
+
 }
