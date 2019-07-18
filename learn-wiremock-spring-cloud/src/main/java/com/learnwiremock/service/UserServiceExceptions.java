@@ -11,13 +11,14 @@ import reactor.core.publisher.Mono;
 import reactor.retry.Retry;
 import reactor.retry.RetryContext;
 import reactor.retry.RetryExhaustedException;
+import com.learnwiremock.config.WebClientRetryConfig;
 
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
+
 
 import static com.learnwiremock.constants.WireMockConstants.USER_URL;
 
@@ -98,14 +99,7 @@ public class UserServiceExceptions {
             return webClient.get().uri(uri)
                     .retrieve()
                     .bodyToMono(User.class)
-                    .retryWhen(Retry.anyOf(WebClientResponseException.class)
-                            .fixedBackoff(Duration.ofSeconds(1))
-                            .retryMax(3)
-                            .doOnRetry((exception) -> {
-                                log.info("The exception is : " + exception);
-
-                            })
-                    )
+                    .retryWhen(WebClientRetryConfig.fixedRetry)
                     .block();
         } catch (RetryExhaustedException e) {
             log.error("RetryExhaustedException is : " + e);
@@ -117,20 +111,11 @@ public class UserServiceExceptions {
 
     public User getUserByNameExceptionHandling_ExponentialDelay_approach4(String name) {
 
-        long intialBackOff = 3;
-        long maxBackOff = 15;
 
         URI uri = UriComponentsBuilder.fromUriString(url + USER_URL)
                 .queryParam("name", name)
                 .buildAndExpand()
                 .toUri();
-
-        Retry<?> retry = Retry.anyOf(WebClientResponseException.class)
-                .exponentialBackoff(Duration.ofSeconds(intialBackOff), Duration.ofSeconds(maxBackOff))
-                .retryMax(3)
-                .doOnRetry((exception) -> {
-                    log.error("The exception is : " + exception);
-                });
 
         try {
             return webClient.get().uri(uri)
@@ -139,7 +124,7 @@ public class UserServiceExceptions {
                     .doOnError((e) -> {
                         log.error("Exception in the doOnError : " + e);
                     })
-                    .retryWhen(retry)
+                    .retryWhen(WebClientRetryConfig.exponentialRetry)
                     .block();
         } catch (RetryExhaustedException e) {
             log.error("RetryExhaustedException is : " + e);
