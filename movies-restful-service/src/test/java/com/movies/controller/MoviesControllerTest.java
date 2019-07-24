@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -32,8 +33,13 @@ public class MoviesControllerTest {
     @Autowired
     MoviesRepository moviesRepository;
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
+
     @BeforeEach
     public void setUp() {
+
 
         String darKKnightCrew = "Christian Bale, Joker";
         String avengersCrew = "Robert Downey Junior, Chris Hemsworth";
@@ -51,7 +57,7 @@ public class MoviesControllerTest {
     @Test
     void getAllItems() {
 
-        List<Movie> items = webTestClient.get().uri(MoviesConstants.GET_ALL_MOVIES_V1)
+        List<Movie> items = webTestClient.get().uri(contextPath.concat(MoviesConstants.GET_ALL_MOVIES_V1))
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(Movie.class)
@@ -65,7 +71,7 @@ public class MoviesControllerTest {
     @Test
     void movieById() {
 
-        Movie movie = webTestClient.get().uri(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1, 001)
+        Movie movie = webTestClient.get().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 001)
                 .exchange()
                 .expectStatus().isOk()
                 .returnResult(Movie.class)
@@ -79,7 +85,7 @@ public class MoviesControllerTest {
     @Test
     void movieById_NotFound() {
 
-        webTestClient.get().uri(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1, 123)
+        webTestClient.get().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 123)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -91,7 +97,7 @@ public class MoviesControllerTest {
         Movie movie = new Movie(002, "Avengers", 2013, avengersCrew, LocalDate.of(2013, 04, 05));
         moviesRepository.save(movie);
 
-        List<Movie> movies = webTestClient.get().uri(uriBuilder -> uriBuilder.path(MOVIE_BY_NAME_QUERY_PARAM_V1)
+        List<Movie> movies = webTestClient.get().uri(uriBuilder -> uriBuilder.path(contextPath.concat(MOVIE_BY_NAME_QUERY_PARAM_V1))
                 .queryParam("movie_name", "Avengers")
                 .build())
                 .exchange()
@@ -101,6 +107,17 @@ public class MoviesControllerTest {
         .toStream().collect(Collectors.toList());
 
         assertEquals(2, movies.size());
+    }
+
+    @Test
+    void movieByIdName_NotFound() {
+
+
+        webTestClient.get().uri(uriBuilder -> uriBuilder.path(contextPath.concat(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .queryParam("movie_name", "ABC")
+                .build())
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
 }

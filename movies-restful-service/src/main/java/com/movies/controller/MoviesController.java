@@ -59,6 +59,19 @@ public class MoviesController {
         }
     }
 
+ //   @GetMapping(MoviesConstants.MOVIE_BY_NAME_QUERY_PARAM_V1)
+    public ResponseEntity<?> movieByYear(@RequestParam("year") Integer year){
+
+        List<Movie> movies = moviesRepository.findByYear(year);
+        if(CollectionUtils.isEmpty(movies)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }else{
+            return ResponseEntity.status(HttpStatus.OK).body(movies);
+
+        }
+    }
+
+
 
 
 

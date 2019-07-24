@@ -10,4 +10,6 @@ public interface MoviesRepository extends CrudRepository<Movie, Integer> {
 
     @Query("select m from Movie m where m.movie_name like %?1%")
     List<Movie> findByMovieName(String movieName);
+
+    List<Movie> findByYear(Integer year);
 }
