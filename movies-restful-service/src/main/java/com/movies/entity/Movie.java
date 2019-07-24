@@ -22,6 +22,6 @@ public class Movie {
     private Integer movie_id;
     private String movie_name;
     private Integer year;
-    private List<String> cast;
+    private String cast;
     private LocalDate movie_release_date;
 }
