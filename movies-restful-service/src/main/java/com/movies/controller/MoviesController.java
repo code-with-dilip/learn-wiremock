@@ -59,7 +59,7 @@ public class MoviesController {
         }
     }
 
- //   @GetMapping(MoviesConstants.MOVIE_BY_NAME_QUERY_PARAM_V1)
+    @GetMapping(MoviesConstants.MOVIE_BY_YEAR_QUERY_PARAM_V1)
     public ResponseEntity<?> movieByYear(@RequestParam("year") Integer year){
 
         List<Movie> movies = moviesRepository.findByYear(year);

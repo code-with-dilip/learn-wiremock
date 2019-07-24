@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.movies.constants.MoviesConstants.MOVIE_BY_NAME_QUERY_PARAM_V1;
+import static com.movies.constants.MoviesConstants.MOVIE_BY_YEAR_QUERY_PARAM_V1;
 import static org.junit.Assert.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -111,13 +112,39 @@ public class MoviesControllerTest {
 
     @Test
     void movieByIdName_NotFound() {
-
-
         webTestClient.get().uri(uriBuilder -> uriBuilder.path(contextPath.concat(MOVIE_BY_NAME_QUERY_PARAM_V1))
                 .queryParam("movie_name", "ABC")
                 .build())
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void movieByYear(){
+
+        List<Movie> movies = webTestClient.get().uri(uriBuilder -> uriBuilder.path(contextPath.concat(MOVIE_BY_YEAR_QUERY_PARAM_V1))
+                .queryParam("year", 2011)
+                .build())
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(Movie.class)
+                .getResponseBody()
+                .toStream().collect(Collectors.toList());
+
+        assertEquals(1, movies.size());
+        assertEquals(000, movies.get(0).getMovie_id().intValue());
+
+    }
+
+    @Test
+    void movieByYear_NotFound(){
+        webTestClient.get().uri(uriBuilder -> uriBuilder.path(contextPath.concat(MOVIE_BY_YEAR_QUERY_PARAM_V1))
+                .queryParam("year", 2012)
+                .build())
+                .exchange()
+                .expectStatus().isNotFound();
+
+    }
+
 
 }
