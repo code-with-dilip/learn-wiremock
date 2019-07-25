@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MoviesRepository extends CrudRepository<Movie, Long> {
 
-    @Query("select m from Movie m where m.movie_name like %?1%")
+    @Query("select m from Movie m where m.name like %?1%")
     List<Movie> findByMovieName(String movieName);
 
     List<Movie> findByYear(Integer year);

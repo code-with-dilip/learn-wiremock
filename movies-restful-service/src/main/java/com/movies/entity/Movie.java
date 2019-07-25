@@ -19,10 +19,10 @@ import java.util.List;
 public class Movie {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long movie_id;
-    private String movie_name;
+    private String name;
     private Integer year;
     private String cast;
-    private LocalDate movie_release_date;
+    private LocalDate release_date;
 }

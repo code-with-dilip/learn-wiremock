@@ -11,10 +11,13 @@ spring:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     data-username: sa
-    jpa:
-      database: h2
-      database-platform: org.hibernate.dialect.H2Dialect
-    h2:
-      console:
-        enabled: true
-        path: /h2-console
+  jpa:
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+#    generate-ddl: false
+#    hibernate:
+#      ddl-auto: create
+  h2:
+    console:
+      enabled: true
+

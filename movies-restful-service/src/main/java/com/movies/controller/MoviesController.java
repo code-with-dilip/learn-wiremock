@@ -70,7 +70,7 @@ public class MoviesController {
 
     @PostMapping(MoviesConstants.ADD_MOVIE_V1)
     public ResponseEntity<?> createMovie(@RequestBody Movie movie){
-        System.out.println("All Movies in the system : " + moviesRepository.findAll());
+        //System.out.println("All Movies in the system : " + moviesRepository.findAll());
         return ResponseEntity.status(HttpStatus.CREATED).body(moviesRepository.save(movie));
 
     }
