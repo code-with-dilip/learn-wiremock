@@ -48,24 +48,6 @@ public class MoviesControllerTest {
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
-
-//    @BeforeEach
-//    public void setUp() {
-//
-//
-//        String darKKnightCrew = "Christian Bale, Joker";
-//        String avengersCrew = "Robert Downey Junior, Chris Hemsworth";
-//        List<Movie> moviesList = List.of(/*new Movie(1l, "DarK Knight", 2011, darKKnightCrew, LocalDate.of(2011, 02, 02)),*/
-//                new Movie(2l, "Avengers EndGame", 2019, avengersCrew, LocalDate.of(2019, 04, 05)));
-//
-//        moviesRepository.saveAll(moviesList);
-//    }
-//
-//    @AfterEach
-//    public void tearDown(){
-//        moviesRepository.deleteAll();
-//    }
-
     @Test
     void getAllItems() {
 
