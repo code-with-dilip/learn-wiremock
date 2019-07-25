@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +34,7 @@ public class MoviesController {
     }
 
     @GetMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
-    public ResponseEntity<?> movieById(@PathVariable Integer id){
+    public ResponseEntity<?> movieById(@PathVariable Long id){
 
         Optional<Movie> movieOptional = moviesRepository.findById(id);
         if(movieOptional.isPresent()){
@@ -70,6 +67,14 @@ public class MoviesController {
 
         }
     }
+
+    @PostMapping(MoviesConstants.ADD_MOVIE_V1)
+    public ResponseEntity<?> createMovie(@RequestBody Movie movie){
+        System.out.println("All Movies in the system : " + moviesRepository.findAll());
+        return ResponseEntity.status(HttpStatus.CREATED).body(moviesRepository.save(movie));
+
+    }
+
 
 
 

@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Generated;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,7 +19,8 @@ import java.util.List;
 public class Movie {
 
     @Id
-    private Integer movie_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long movie_id;
     private String movie_name;
     private Integer year;
     private String cast;
