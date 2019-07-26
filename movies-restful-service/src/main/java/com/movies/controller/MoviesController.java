@@ -93,7 +93,7 @@ public class MoviesController {
     }
 
     protected void createUpdatedMovieEntity(Movie movieToUpdate, Movie updateMovie) {
-        if (updateMovie.getName()!=null && !updateMovie.getName().equals(movieToUpdate.getName())){
+        if (checkEmptyNullString(updateMovie.getName()) && !updateMovie.getName().equals(movieToUpdate.getName())){
             movieToUpdate.setName(updateMovie.getName());
         }
         if(updateMovie.getYear()!=null && updateMovie.getYear()!= movieToUpdate.getYear()){
@@ -103,11 +103,15 @@ public class MoviesController {
             movieToUpdate.setRelease_date(updateMovie.getRelease_date());
         }
 
-        if(!StringUtils.isEmpty(updateMovie.getCast()) && !StringUtils.isEmpty(updateMovie.getCast().trim()) && !updateMovie.getCast().equals(movieToUpdate.getCast())){
+        if(checkEmptyNullString(updateMovie.getCast()) && !updateMovie.getCast().equals(movieToUpdate.getCast())){
             String newCast = updateMovie.getCast();
             movieToUpdate.setCast(movieToUpdate.getCast().concat(", ").concat(newCast));
         }
 
+    }
+
+    private boolean checkEmptyNullString(String input){
+        return !StringUtils.isEmpty(input) && !StringUtils.isEmpty(input.trim());
     }
 
 
