@@ -24,54 +24,54 @@ public class MoviesController {
     MoviesRepository moviesRepository;
 
     @GetMapping(MoviesConstants.GET_ALL_MOVIES_V1)
-    public List<Movie> allMovies(){
+    public List<Movie> allMovies() {
 
         List<Movie> moviesList = new ArrayList<>();
-         moviesRepository.findAll().
+        moviesRepository.findAll().
                 forEach(movie -> {
                     moviesList.add(movie);
                 });
-         return moviesList;
+        return moviesList;
 
     }
 
     @GetMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
-    public ResponseEntity<?> movieById(@PathVariable Long id){
+    public ResponseEntity<?> movieById(@PathVariable Long id) {
 
         Optional<Movie> movieOptional = moviesRepository.findById(id);
-        if(movieOptional.isPresent()){
+        if (movieOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.OK).body(movieOptional.get());
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @GetMapping(MoviesConstants.MOVIE_BY_NAME_QUERY_PARAM_V1)
-    public ResponseEntity<?> movieByName(@RequestParam("movie_name") String name){
+    public ResponseEntity<?> movieByName(@RequestParam("movie_name") String name) {
 
         List<Movie> movies = moviesRepository.findByMovieName(name);
-        if(CollectionUtils.isEmpty(movies)){
+        if (CollectionUtils.isEmpty(movies)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.OK).body(movies);
 
         }
     }
 
     @GetMapping(MoviesConstants.MOVIE_BY_YEAR_QUERY_PARAM_V1)
-    public ResponseEntity<?> movieByYear(@RequestParam("year") Integer year){
+    public ResponseEntity<?> movieByYear(@RequestParam("year") Integer year) {
 
         List<Movie> movies = moviesRepository.findByYear(year);
-        if(CollectionUtils.isEmpty(movies)){
+        if (CollectionUtils.isEmpty(movies)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.OK).body(movies);
 
         }
     }
 
     @PostMapping(MoviesConstants.ADD_MOVIE_V1)
-    public ResponseEntity<?> createMovie(@RequestBody Movie movie){
+    public ResponseEntity<?> createMovie(@RequestBody Movie movie) {
         //System.out.println("All Movies in the system : " + moviesRepository.findAll());
         return ResponseEntity.status(HttpStatus.CREATED).body(moviesRepository.save(movie));
 
@@ -79,38 +79,52 @@ public class MoviesController {
 
 
     @PutMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
-    public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestBody Movie updateMovie){
+    public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestBody Movie updateMovie) {
 
         Optional<Movie> movieToUpdateOptional = moviesRepository.findById(id);
-        if(movieToUpdateOptional.isPresent()){
+        if (movieToUpdateOptional.isPresent()) {
             Movie movieToUpdate = movieToUpdateOptional.get();
             createUpdatedMovieEntity(movieToUpdate, updateMovie);
             return ResponseEntity.status(HttpStatus.OK).body(moviesRepository.save(movieToUpdate));
 
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
+    @DeleteMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
+    public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
+
+        Optional<Movie> movieToUpdateOptional = moviesRepository.findById(id);
+        if (movieToUpdateOptional.isPresent()) {
+            moviesRepository.deleteById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(MoviesConstants.DELETE_MESSAGE);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+
+    }
+
     protected void createUpdatedMovieEntity(Movie movieToUpdate, Movie updateMovie) {
-        if (checkEmptyNullString(updateMovie.getName()) && !updateMovie.getName().equals(movieToUpdate.getName())){
+        if (checkEmptyNullString(updateMovie.getName()) && !updateMovie.getName().equals(movieToUpdate.getName())) {
             movieToUpdate.setName(updateMovie.getName());
         }
-        if(updateMovie.getYear()!=null && updateMovie.getYear()!= movieToUpdate.getYear()){
+        if (updateMovie.getYear() != null && updateMovie.getYear() != movieToUpdate.getYear()) {
             movieToUpdate.setYear(updateMovie.getYear());
         }
-        if(updateMovie.getRelease_date()!=null && !updateMovie.getRelease_date().isEqual(movieToUpdate.getRelease_date())){
+        if (updateMovie.getRelease_date() != null && !updateMovie.getRelease_date().isEqual(movieToUpdate.getRelease_date())) {
             movieToUpdate.setRelease_date(updateMovie.getRelease_date());
         }
 
-        if(checkEmptyNullString(updateMovie.getCast()) && !updateMovie.getCast().equals(movieToUpdate.getCast())){
+        if (checkEmptyNullString(updateMovie.getCast()) && !updateMovie.getCast().equals(movieToUpdate.getCast())) {
             String newCast = updateMovie.getCast();
             movieToUpdate.setCast(movieToUpdate.getCast().concat(", ").concat(newCast));
         }
 
     }
 
-    private boolean checkEmptyNullString(String input){
+    private boolean checkEmptyNullString(String input) {
         return !StringUtils.isEmpty(input) && !StringUtils.isEmpty(input.trim());
     }
 

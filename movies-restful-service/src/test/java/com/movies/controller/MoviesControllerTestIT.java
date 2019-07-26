@@ -211,9 +211,24 @@ public class MoviesControllerTestIT {
                 .jsonPath("$.year").isEqualTo(year)
                 .jsonPath("$.cast").isEqualTo(expectedCast);
 
-
-
     }
 
+    @Test
+    void deleteMovie(){
+
+        webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 1000)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .isEqualTo(MoviesConstants.DELETE_MESSAGE);
+    }
+
+    @Test
+    void deleteMovie_invalidMovieId(){
+
+        webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 2000)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }
