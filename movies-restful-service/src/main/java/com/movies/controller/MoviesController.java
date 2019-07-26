@@ -85,7 +85,7 @@ public class MoviesController {
         if(movieToUpdateOptional.isPresent()){
             Movie movieToUpdate = movieToUpdateOptional.get();
             createUpdatedMovieEntity(movieToUpdate, updateMovie);
-            return ResponseEntity.status(HttpStatus.OK).body(movieToUpdate);
+            return ResponseEntity.status(HttpStatus.OK).body(moviesRepository.save(movieToUpdate));
 
         }else{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

@@ -144,8 +144,11 @@ public class MoviesControllerTestIT {
     @Test
     void createMovie(){
 
+        //given
         String batmanBeginsCrew = "Christian Bale, Liam Neesan";
         Movie newMovie = new Movie(null, "Batman Begins", 2008, batmanBeginsCrew, LocalDate.of(2018, 02, 02));
+
+        //when
         webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
                 .body(Mono.just(newMovie), Movie.class)
                 .exchange()
@@ -161,8 +164,11 @@ public class MoviesControllerTestIT {
     @Disabled
     void createMovie_DuplicateRecord(){
 
+        //given
         String batmanBeginsCrew = "Christian Bale, Liam Neesan";
         Movie newMovie = new Movie(1000l, "DarK Knight", 2011, batmanBeginsCrew, LocalDate.of(2011, 02, 02));
+
+        //when
         webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
                 .body(Mono.just(newMovie), Movie.class)
                 .exchange()
@@ -172,6 +178,40 @@ public class MoviesControllerTestIT {
                 .body(Mono.just(newMovie), Movie.class)
                 .exchange()
                 .expectStatus().is5xxServerError();
+
+    }
+
+    @Test
+    void updateMovie(){
+
+        //given
+        LocalDate newMovieReleaseDate = LocalDate.of(2013, 03, 03);
+        String name= "DarK Knight1";
+        Integer year= 2013;
+        String newCrewMember = "Katie Holmes";
+        Movie updateMovie = new Movie(null, name, year, newCrewMember, newMovieReleaseDate);
+        String expectedCast = "Christian Bale, Joker, Katie Holmes";
+
+        //when
+        webTestClient.put().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 1000)
+                .syncBody(updateMovie)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.name").isEqualTo(name)
+                .jsonPath("$.year").isEqualTo(year)
+                .jsonPath("$.cast").isEqualTo(expectedCast);
+
+
+        webTestClient.get().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 1000)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.name").isEqualTo(name)
+                .jsonPath("$.year").isEqualTo(year)
+                .jsonPath("$.cast").isEqualTo(expectedCast);
+
+
 
     }
 
