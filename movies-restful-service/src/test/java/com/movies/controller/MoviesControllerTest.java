@@ -166,6 +166,11 @@ public class MoviesControllerTest {
         webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
                 .body(Mono.just(newMovie), Movie.class)
                 .exchange()
+                .expectStatus().isCreated();
+
+        webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
+                .body(Mono.just(newMovie), Movie.class)
+                .exchange()
                 .expectStatus().is5xxServerError();
 
     }
