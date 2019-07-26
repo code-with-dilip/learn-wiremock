@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,8 +78,37 @@ public class MoviesController {
     }
 
 
+    @PutMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
+    public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestBody Movie updateMovie){
 
+        Optional<Movie> movieToUpdateOptional = moviesRepository.findById(id);
+        if(movieToUpdateOptional.isPresent()){
+            Movie movieToUpdate = movieToUpdateOptional.get();
+            createUpdatedMovieEntity(movieToUpdate, updateMovie);
+            return ResponseEntity.status(HttpStatus.OK).body(movieToUpdate);
 
+        }else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    protected void createUpdatedMovieEntity(Movie movieToUpdate, Movie updateMovie) {
+        if (updateMovie.getName()!=null && !updateMovie.getName().equals(movieToUpdate.getName())){
+            movieToUpdate.setName(updateMovie.getName());
+        }
+        if(updateMovie.getYear()!=null && updateMovie.getYear()!= movieToUpdate.getYear()){
+            movieToUpdate.setYear(updateMovie.getYear());
+        }
+        if(updateMovie.getRelease_date()!=null && !updateMovie.getRelease_date().isEqual(movieToUpdate.getRelease_date())){
+            movieToUpdate.setRelease_date(updateMovie.getRelease_date());
+        }
+
+        if(!StringUtils.isEmpty(updateMovie.getCast()) && !StringUtils.isEmpty(updateMovie.getCast().trim()) && !updateMovie.getCast().equals(movieToUpdate.getCast())){
+            String newCast = updateMovie.getCast();
+            movieToUpdate.setCast(movieToUpdate.getCast().concat(", ").concat(newCast));
+        }
+
+    }
 
 
 }

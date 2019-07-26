@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
         @Sql(scripts = {"/sql/TearDown.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 
 })
-public class MoviesControllerTest {
+public class MoviesControllerTestIT {
 
     @Autowired
     WebTestClient webTestClient;
