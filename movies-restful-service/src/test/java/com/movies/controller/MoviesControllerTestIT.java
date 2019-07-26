@@ -153,8 +153,6 @@ public class MoviesControllerTestIT {
         //given
         String batmanBeginsCrew = "Christian Bale, Liam Neesan";
         Movie newMovie = new Movie(null, "Batman Begins", 2008, batmanBeginsCrew, LocalDate.of(2018, 02, 02));
-        ObjectMapper objectMapper = new ObjectMapper();
-        System.out.println("Movie Json : " + objectMapper.writeValueAsString(newMovie));
 
         //when
         webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
@@ -164,8 +162,23 @@ public class MoviesControllerTestIT {
                 .expectBody()
                 .jsonPath("$.movie_id").isNotEmpty()
                 .jsonPath("$.year", 2008);
+    }
 
+    @Test
+    void createMovie_Validating_Input_Data() throws JsonProcessingException {
 
+        //given
+        String batmanBeginsCrew = "Christian Bale, Liam Neesan";
+        Movie newMovie = new Movie(null, "", null, null, LocalDate.of(2018, 02, 02));
+        String expectedErrorMessage = "Please pass all the input fields : [cast, name, year]";
+
+        //when
+        webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
+                .body(Mono.just(newMovie), Movie.class)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody(String.class)
+                .isEqualTo(expectedErrorMessage);
     }
 
     @Test

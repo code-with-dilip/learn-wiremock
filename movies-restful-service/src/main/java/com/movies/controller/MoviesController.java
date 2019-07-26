@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,8 +109,7 @@ public class MoviesController {
             }
     )
     @PostMapping(MoviesConstants.ADD_MOVIE_V1)
-    public ResponseEntity<?> createMovie(@RequestBody Movie movie) {
-        //System.out.println("All Movies in the system : " + moviesRepository.findAll());
+    public ResponseEntity<?> createMovie(@Valid @RequestBody Movie movie) {
         return ResponseEntity.status(HttpStatus.CREATED).body(moviesRepository.save(movie));
 
     }

@@ -11,4 +11,5 @@ public class MoviesConstants {
     public static final String ADD_MOVIE_V1 =  "/v1/movie";
     public static final String DELETE_MESSAGE ="Movie Deleted Successfully";
 
+    public static final String ERROR_MESSAGE = "Please pass all the input fields : ";
 }
