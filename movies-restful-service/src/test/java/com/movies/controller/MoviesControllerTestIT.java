@@ -1,6 +1,8 @@
 package com.movies.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.movies.constants.MoviesConstants;
 import com.movies.entity.Movie;
 import com.movies.repositry.MoviesRepository;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
@@ -19,6 +22,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -142,11 +148,13 @@ public class MoviesControllerTestIT {
     }
 
     @Test
-    void createMovie(){
+    void createMovie() throws JsonProcessingException {
 
         //given
         String batmanBeginsCrew = "Christian Bale, Liam Neesan";
         Movie newMovie = new Movie(null, "Batman Begins", 2008, batmanBeginsCrew, LocalDate.of(2018, 02, 02));
+        ObjectMapper objectMapper = new ObjectMapper();
+        System.out.println("Movie Json : " + objectMapper.writeValueAsString(newMovie));
 
         //when
         webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
@@ -159,6 +167,26 @@ public class MoviesControllerTestIT {
 
 
     }
+
+    @Test
+    void createMovie_usingJson() throws IOException {
+
+        //given
+        String movieJson = Files.readString(Path.of("src/test/resources/data/movie.json"));
+
+        //when
+        webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_V1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .syncBody(movieJson)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.movie_id").isNotEmpty()
+                .jsonPath("$.year", 2008);
+
+
+    }
+
 
     @Test
     @Disabled
