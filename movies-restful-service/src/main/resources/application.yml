@@ -4,6 +4,7 @@ spring:
 server:
   servlet:
     context-path: /movieservice
+  port: 8081
 ---
 spring:
   profiles: dev
