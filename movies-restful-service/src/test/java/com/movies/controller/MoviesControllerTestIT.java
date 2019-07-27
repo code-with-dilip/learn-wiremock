@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -43,6 +44,7 @@ import static org.junit.Assert.assertEquals;
         @Sql(scripts = {"/sql/TearDown.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 
 })
+@ActiveProfiles("test")
 public class MoviesControllerTestIT {
 
     @Autowired
