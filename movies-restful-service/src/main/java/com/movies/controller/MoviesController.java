@@ -38,10 +38,12 @@ public class MoviesController {
     )
     public List<Movie> allMovies() {
         List<Movie> moviesList = new ArrayList<>();
+        log.info("Received request for All Movies");
         moviesRepository.findAll().
                 forEach(movie -> {
                     moviesList.add(movie);
                 });
+        log.info("Response is : {}", moviesList);
         return moviesList;
 
     }
@@ -55,6 +57,8 @@ public class MoviesController {
             }
     )
     public ResponseEntity<?> movieById(@PathVariable Long id) {
+
+        log.info("Received the request to search by Movie Id {} .", id);
 
         Optional<Movie> movieOptional = moviesRepository.findById(id);
         if (movieOptional.isPresent()) {
@@ -73,6 +77,8 @@ public class MoviesController {
     )
     @GetMapping(MoviesConstants.MOVIE_BY_NAME_QUERY_PARAM_V1)
     public ResponseEntity<?> movieByName(@RequestParam("movie_name") String name) {
+
+        log.info("Received the request to search by Movie name {} .", name);
 
         List<Movie> movies = moviesRepository.findByMovieName(name);
         if (CollectionUtils.isEmpty(movies)) {
@@ -93,6 +99,8 @@ public class MoviesController {
     )
     public ResponseEntity<?> movieByYear(@RequestParam("year") Integer year) {
 
+        log.info("Received the request to search by Movie Year {} .", year);
+
         List<Movie> movies = moviesRepository.findByYear(year);
         if (CollectionUtils.isEmpty(movies)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -110,6 +118,9 @@ public class MoviesController {
     )
     @PostMapping(MoviesConstants.ADD_MOVIE_V1)
     public ResponseEntity<?> createMovie(@Valid @RequestBody Movie movie) {
+
+        log.info("Received the request to add a new Movie in the service {} ", movie);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(moviesRepository.save(movie));
 
     }
@@ -123,6 +134,9 @@ public class MoviesController {
     )
     @PutMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
     public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestBody Movie updateMovie) {
+
+        log.info("Received the request to update the movie. Movie Id is {} and the updated Movie Details are {} ", id, updateMovie);
+
         Optional<Movie> movieToUpdateOptional = moviesRepository.findById(id);
         if (movieToUpdateOptional.isPresent()) {
             Movie movieToUpdate = movieToUpdateOptional.get();
@@ -143,6 +157,7 @@ public class MoviesController {
     @DeleteMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
     public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
 
+        log.info("Received the request to delete a movie and the id is {} .", id);
         Optional<Movie> movieToUpdateOptional = moviesRepository.findById(id);
         if (movieToUpdateOptional.isPresent()) {
             moviesRepository.deleteById(id);

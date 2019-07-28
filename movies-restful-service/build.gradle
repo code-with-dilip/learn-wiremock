@@ -7,8 +7,6 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'com.movies'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -24,6 +22,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
@@ -34,8 +34,9 @@ dependencies {
     implementation "io.springfox:springfox-swagger2:2.9.2"
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
+    //Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	//junit4-dependencies
+	//junit5-dependencies
 	testImplementation("org.junit.platform:junit-platform-launcher:1.4.0")
 	testImplementation("org.junit.jupiter:junit-jupiter-engine:5.3.2")
 	testImplementation("org.junit.vintage:junit-vintage-engine:5.3.2")
