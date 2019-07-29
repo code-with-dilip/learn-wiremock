@@ -58,17 +58,20 @@ public class MoviesController {
     )
     public ResponseEntity<?> movieById(@PathVariable Long id) {
 
-        log.info("Received the request to search by Movie Id {} .", id);
+        log.info("Received the request to search by Movie Id - {} .", id);
 
         Optional<Movie> movieOptional = moviesRepository.findById(id);
         if (movieOptional.isPresent()) {
+            log.info("Response is : {}", movieOptional.get());
             return ResponseEntity.status(HttpStatus.OK).body(movieOptional.get());
         } else {
+            log.info("No Movie available for the given Movie Id - {}.", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
     }
 
-    @ApiOperation("Retrieve a movie using the movie name.")
+    @ApiOperation("Returns the movies using the movie name passed as part of the request.")
     @ApiResponses(
             value = {
                     @ApiResponse(code = 200, message = "Returns the movie using the name of the movie."),
@@ -78,12 +81,14 @@ public class MoviesController {
     @GetMapping(MoviesConstants.MOVIE_BY_NAME_QUERY_PARAM_V1)
     public ResponseEntity<?> movieByName(@RequestParam("movie_name") String name) {
 
-        log.info("Received the request to search by Movie name {} .", name);
+        log.info("Received the request to search by Movie name - {} .", name);
 
         List<Movie> movies = moviesRepository.findByMovieName(name);
         if (CollectionUtils.isEmpty(movies)) {
+            log.info("No Movie available for the given Movie name - {}.", name);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
+            log.info("Response is : {}", movies);
             return ResponseEntity.status(HttpStatus.OK).body(movies);
 
         }
@@ -99,14 +104,15 @@ public class MoviesController {
     )
     public ResponseEntity<?> movieByYear(@RequestParam("year") Integer year) {
 
-        log.info("Received the request to search by Movie Year {} .", year);
+        log.info("Received the request to search by Movie Year - {} .", year);
 
         List<Movie> movies = moviesRepository.findByYear(year);
         if (CollectionUtils.isEmpty(movies)) {
+            log.info("No Movie available for the given Movie Year - {}.", year);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
+            log.info("Response is : {}", movies);
             return ResponseEntity.status(HttpStatus.OK).body(movies);
-
         }
     }
 
@@ -120,8 +126,9 @@ public class MoviesController {
     public ResponseEntity<?> createMovie(@Valid @RequestBody Movie movie) {
 
         log.info("Received the request to add a new Movie in the service {} ", movie);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(moviesRepository.save(movie));
+        Movie addedMovie = moviesRepository.save(movie);
+        log.info("Movie SuccessFully added to the DB. New Movie Details are - .", movie);
+        return ResponseEntity.status(HttpStatus.CREATED).body(addedMovie);
 
     }
 
@@ -141,8 +148,11 @@ public class MoviesController {
         if (movieToUpdateOptional.isPresent()) {
             Movie movieToUpdate = movieToUpdateOptional.get();
             createUpdatedMovieEntity(movieToUpdate, updateMovie);
-            return ResponseEntity.status(HttpStatus.OK).body(moviesRepository.save(movieToUpdate));
+            moviesRepository.save(movieToUpdate);
+            log.info("Updated Movie Details are - ", movieToUpdate);
+            return ResponseEntity.status(HttpStatus.OK).body(movieToUpdate);
         } else {
+            log.info("No Movie available for the given Movie Id - {}.", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
@@ -161,8 +171,10 @@ public class MoviesController {
         Optional<Movie> movieToUpdateOptional = moviesRepository.findById(id);
         if (movieToUpdateOptional.isPresent()) {
             moviesRepository.deleteById(id);
+            log.info("Movie Successfully deleted from the DB");
             return ResponseEntity.status(HttpStatus.OK).body(MoviesConstants.DELETE_MESSAGE);
         } else {
+            log.info("No Movie available for the given Movie Id - {}.", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
