@@ -161,6 +161,32 @@ public class MoviesServiceTest {
         Assertions.assertThrows(MovieErrorResponse.class,()->moviesService.updateMovie(movieId, darkNightRises));
     }
 
+    @Test
+    void deleteMovie() {
+
+        //given
+        Integer movieId=1;
+
+        //when
+        String response = moviesService.deleteMovieById(movieId);
+
+        //then
+        String expectedResponse = "Movie Deleted Successfully";
+        assertEquals(expectedResponse, response);
+
+    }
+
+    @Test
+    void deleteMovie_notFound() {
+
+        //given
+        Integer movieId=100;
+
+        //when
+        Assertions.assertThrows(MovieErrorResponse.class, ()-> moviesService.deleteMovieById(movieId)) ;
+
+    }
+
 
     @Test
     @Disabled

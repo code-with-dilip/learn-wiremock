@@ -166,4 +166,24 @@ public class MoviesService {
 
         return updatedMovie;
     }
+
+    public String deleteMovieById(Integer movieId) {
+
+       String response;
+        try {
+            response = webClient.delete().uri(baseUrl + MOVIE_BY_ID_PATH_PARAM_V1, movieId)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        }catch (WebClientResponseException ex) {
+            log.error("WebClientResponseException - Error Message is : {}", ex, ex.getResponseBodyAsString());
+            throw new MovieErrorResponse(ex.getStatusText(), ex);
+        } catch (Exception ex) {
+            log.error("Exception - The Error Message is {} ", ex.getMessage());
+            throw new MovieErrorResponse(ex);
+        }
+
+       return response;
+
+    }
 }
