@@ -81,7 +81,7 @@ public class MoviesServiceTest {
         String movieName = "ABC";
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class,()-> moviesService.retrieveMovieByName(movieName));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.retrieveMovieByName(movieName));
     }
 
 
@@ -104,7 +104,7 @@ public class MoviesServiceTest {
         Integer year = 1950;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class,()->moviesService.retreieveMovieByYear(year));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.retreieveMovieByYear(year));
 
     }
 
@@ -118,7 +118,7 @@ public class MoviesServiceTest {
         Movie movie = moviesService.addNewMovie(toyStory);
 
         //then
-        assertTrue(movie.getMovie_id()!=null);
+        assertTrue(movie.getMovie_id() != null);
 
     }
 
@@ -130,10 +130,37 @@ public class MoviesServiceTest {
         Movie toyStory = new Movie(null, null, null, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class,()->moviesService.addNewMovie(toyStory));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.addNewMovie(toyStory));
 
     }
 
+    @Test
+    void updateMovie() {
+        //given
+        String darkNightRisesCrew = "Tom Hardy";
+        Movie darkNightRises = new Movie(null, null, null, darkNightRisesCrew, null);
+        Integer movieId = 3;
+
+        //when
+        Movie updatedMovie = moviesService.updateMovie(movieId, darkNightRises);
+
+        //then
+        String updatedCastName = "Christian Bale, Heath Ledger , Michael Caine, Tom Hardy";
+        assertEquals(updatedCastName, updatedMovie.getCast());
+
+
+    }
+
+    @Test
+    void updateMovie_Not_Found() {
+        //given
+        String darkNightRisesCrew = "Tom Hardy";
+        Movie darkNightRises = new Movie(null, null, null, darkNightRisesCrew, null);
+        Integer movieId = 100;
+
+        //when
+        Assertions.assertThrows(MovieErrorResponse.class,()->moviesService.updateMovie(movieId, darkNightRises));
+    }
 
 
     @Test

@@ -93,6 +93,7 @@ public class MoviesService {
 
     /**
      * This method makes a REST call to the Movies RESTFUL Service and retrieves a list of Movies as a response based on the year.
+     *
      * @param year - Integer (Example : 2012,2013 etc.,)
      * @return - List<Movie>
      */
@@ -121,6 +122,7 @@ public class MoviesService {
 
     /**
      * This method makes the REST call to add a new Movie to the Movies RESTFUL Service.
+     *
      * @param newMovie
      * @return
      */
@@ -142,5 +144,26 @@ public class MoviesService {
             throw new MovieErrorResponse(ex);
         }
         return movie;
+    }
+
+    public Movie updateMovie(Integer movieId, Movie movie) {
+        Movie updatedMovie;
+
+        try {
+            updatedMovie = webClient.put().uri(baseUrl + MOVIE_BY_ID_PATH_PARAM_V1, movieId)
+                    .syncBody(movie)
+                    .retrieve()
+                    .bodyToMono(Movie.class)
+                    .block();
+            log.info(" Movie SuccessFully updated {} ", updatedMovie);
+        } catch (WebClientResponseException ex) {
+            log.error("WebClientResponseException - Error Message is : {}", ex, ex.getResponseBodyAsString());
+            throw new MovieErrorResponse(ex.getStatusText(), ex);
+        } catch (Exception ex) {
+            log.error("Exception - The Error Message is {} ", ex.getMessage());
+            throw new MovieErrorResponse(ex);
+        }
+
+        return updatedMovie;
     }
 }
