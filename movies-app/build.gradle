@@ -12,9 +12,9 @@ repositories {
     mavenCentral()
 }
 
-/*test {
+test {
     useJUnitPlatform() // enables Junit5
-}*/
+}
 
 dependencies {
     //webclient-dependencies
@@ -36,7 +36,6 @@ dependencies {
 
 
     //junit5-dependencies
-  //  testRuntime("org.junit.platform:junit-platform-launcher:1.4.0")
     testImplementation('org.junit.jupiter:junit-jupiter:5.5.1')
 }
 
