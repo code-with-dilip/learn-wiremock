@@ -2,6 +2,7 @@ package com.movies.initialize;
 
 import com.movies.entity.Movie;
 import com.movies.repositry.MoviesRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Component
 @Profile("!test")
+@Slf4j
 public class MoviesDataInitializer implements CommandLineRunner {
 
     @Autowired
@@ -34,5 +36,9 @@ public class MoviesDataInitializer implements CommandLineRunner {
 
         List<Movie> moviesList = Arrays.asList(batmanBegins,darkKnight,darkKnightRises,avengers,avengersAgeOfUltron,avengersInfinityWar,avengersEndGame,hangOver,theImitationGame,theDeparted);
         moviesRepository.saveAll(moviesList);
+        log.info("********* Movies RestFul Service Initial Data Starts *********");
+        moviesRepository.findAll()
+                .forEach((movie -> log.info(""+movie)));
+        log.info("********* Movies RestFul Service Initial Data Ends *********");
     }
 }

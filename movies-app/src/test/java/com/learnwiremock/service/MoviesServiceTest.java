@@ -33,6 +33,7 @@ public class MoviesServiceTest {
 
         //when
         List<Movie> movieList = moviesService.retrieveAllMovies();
+        System.out.println("movieList : " + movieList);
 
         //then
         assertTrue(!movieList.isEmpty());
@@ -165,7 +166,10 @@ public class MoviesServiceTest {
     void deleteMovie() {
 
         //given
-        Integer movieId=1;
+        String batmanBeginsCrew = "Tom Hanks, Tim Allen";
+        Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
+        Movie movie = moviesService.addNewMovie(toyStory);
+        Integer movieId=movie.getMovie_id().intValue();
 
         //when
         String response = moviesService.deleteMovieById(movieId);
