@@ -13,12 +13,12 @@ import java.util.List;
 import static com.learnwiremock.constants.MovieAppConstants.*;
 
 @Slf4j
-public class MoviesService {
+public class MoviesRestClient {
 
     private WebClient webClient;
     private String baseUrl;
 
-    public MoviesService(String _baseUrl, WebClient _webClient) {
+    public MoviesRestClient(String _baseUrl, WebClient _webClient) {
         this.webClient = _webClient;
         this.baseUrl = _baseUrl;
     }
