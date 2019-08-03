@@ -3,9 +3,7 @@ package com.learnwiremock.service;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import org.junit.jupiter.api.*;
-import org.junit.platform.commons.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Disabled
 public class MoviesServiceTest {
 
-    MoviesService moviesService = null;
+    MoviesRestClient moviesRestClient = null;
     WebClient webClient;
 
 
@@ -25,7 +23,7 @@ public class MoviesServiceTest {
         int port = 8081;
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
-        moviesService = new MoviesService(baseUrl, webClient);
+        moviesRestClient = new MoviesRestClient(baseUrl, webClient);
 
     }
 
@@ -33,7 +31,7 @@ public class MoviesServiceTest {
     void getAllMovies() {
 
         //when
-        List<Movie> movieList = moviesService.retrieveAllMovies();
+        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
 
         //then
         assertTrue(!movieList.isEmpty());
@@ -45,7 +43,7 @@ public class MoviesServiceTest {
         Integer movieId = 1;
 
         //when
-        Movie movie = moviesService.retrieveMovieById(movieId);
+        Movie movie = moviesRestClient.retrieveMovieById(movieId);
 
         //then
         assertEquals("Batman Begins", movie.getName());
@@ -57,7 +55,7 @@ public class MoviesServiceTest {
         Integer movieId = 100;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.retrieveMovieById(movieId));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieById(movieId));
 
     }
 
@@ -67,7 +65,7 @@ public class MoviesServiceTest {
         String movieName = "Avengers";
 
         //when
-        List<Movie> movieList = moviesService.retrieveMovieByName(movieName);
+        List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
 
         //then
         String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
@@ -81,7 +79,7 @@ public class MoviesServiceTest {
         String movieName = "ABC";
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.retrieveMovieByName(movieName));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieByName(movieName));
     }
 
 
@@ -91,7 +89,7 @@ public class MoviesServiceTest {
         Integer year = 2012;
 
         //when
-        List<Movie> movieList = moviesService.retreieveMovieByYear(year);
+        List<Movie> movieList = moviesRestClient.retreieveMovieByYear(year);
 
         //then
         assertEquals(2, movieList.size());
@@ -104,7 +102,7 @@ public class MoviesServiceTest {
         Integer year = 1950;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.retreieveMovieByYear(year));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retreieveMovieByYear(year));
 
     }
 
@@ -115,7 +113,7 @@ public class MoviesServiceTest {
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
 
         //when
-        Movie movie = moviesService.addNewMovie(toyStory);
+        Movie movie = moviesRestClient.addNewMovie(toyStory);
 
         //then
         assertTrue(movie.getMovie_id() != null);
@@ -130,7 +128,7 @@ public class MoviesServiceTest {
         Movie toyStory = new Movie(null, null, null, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.addNewMovie(toyStory));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.addNewMovie(toyStory));
 
     }
 
@@ -142,7 +140,7 @@ public class MoviesServiceTest {
         Integer movieId = 3;
 
         //when
-        Movie updatedMovie = moviesService.updateMovie(movieId, darkNightRises);
+        Movie updatedMovie = moviesRestClient.updateMovie(movieId, darkNightRises);
 
         //then
         String updatedCastName = "Christian Bale, Heath Ledger , Michael Caine, Tom Hardy";
@@ -159,14 +157,14 @@ public class MoviesServiceTest {
         Integer movieId = 100;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class,()->moviesService.updateMovie(movieId, darkNightRises));
+        Assertions.assertThrows(MovieErrorResponse.class,()-> moviesRestClient.updateMovie(movieId, darkNightRises));
     }
 
 
     @Test
     @Disabled
     void getAllMovies_Exception() {
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesService.retrieveAllMovies());
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
     }
 
 }
