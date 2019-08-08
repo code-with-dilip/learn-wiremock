@@ -12,10 +12,6 @@ repositories {
     mavenCentral()
 }
 
-test {
-    useJUnitPlatform() // enables Junit5
-}
-
 dependencies {
     //webclient-dependencies
     implementation 'org.springframework:spring-webflux:5.1.8.RELEASE'
@@ -28,15 +24,16 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.7.26'
 
 
+
     //jackson
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.9'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9'
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.9'
 
-
     //junit5-dependencies
-    testImplementation('org.junit.jupiter:junit-jupiter:5.5.1')
+    testImplementation("junit:junit:4.12")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.5.1")
 }
 
 
