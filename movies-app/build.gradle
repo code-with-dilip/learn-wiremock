@@ -12,6 +12,10 @@ repositories {
     mavenCentral()
 }
 
+test{
+    useJUnitPlatform()
+}
+
 dependencies {
     //webclient-dependencies
     implementation 'org.springframework:spring-webflux:5.1.8.RELEASE'
