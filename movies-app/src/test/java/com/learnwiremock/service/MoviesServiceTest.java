@@ -36,8 +36,8 @@ public class MoviesServiceTest {
 
     @BeforeEach
     void setUp() {
-        //int port = 8081;
-        int port = wireMockServer.port();
+        int port = 8081;
+       // int port = wireMockServer.port();
         System.out.println("Movies Port : " + port);
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
@@ -171,7 +171,7 @@ public class MoviesServiceTest {
 
         //then
         String updatedCastName = "Christian Bale, Heath Ledger , Michael Caine, Tom Hardy";
-        assertEquals(updatedCastName, updatedMovie.getCast());
+        assertTrue(updatedMovie.getCast().contains(darkNightRisesCrew));
 
 
     }
@@ -184,7 +184,7 @@ public class MoviesServiceTest {
         Integer movieId = 100;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.updateMovie(movieId, darkNightRises));
+        Assertions.assertThrows(MovieErrorResponse.class,()-> moviesRestClient.updateMovie(movieId, darkNightRises));
     }
 
     @Test
@@ -194,7 +194,7 @@ public class MoviesServiceTest {
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
         Movie movie = moviesRestClient.addNewMovie(toyStory);
-        Integer movieId = movie.getMovie_id().intValue();
+        Integer movieId=movie.getMovie_id().intValue();
 
         //when
         String response = moviesRestClient.deleteMovieById(movieId);
@@ -209,10 +209,10 @@ public class MoviesServiceTest {
     void deleteMovie_notFound() {
 
         //given
-        Integer movieId = 100;
+        Integer movieId=100;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.deleteMovieById(movieId));
+        Assertions.assertThrows(MovieErrorResponse.class, ()-> moviesRestClient.deleteMovieById(movieId)) ;
 
     }
 
