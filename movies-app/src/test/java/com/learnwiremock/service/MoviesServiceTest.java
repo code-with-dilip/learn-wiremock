@@ -1,8 +1,13 @@
 package com.learnwiremock.service;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
+import com.learnwiremock.helper.TestHelper;
 import org.junit.jupiter.api.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
@@ -15,11 +20,25 @@ public class MoviesServiceTest {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
+    static WireMockServer wireMockServer = new WireMockServer();
+
+    @BeforeAll
+    static void start() {
+        wireMockServer.start();
+
+    }
+
+    @AfterAll
+    static void shutDown() {
+        wireMockServer.shutdown();
+    }
 
 
     @BeforeEach
     void setUp() {
-        int port = 8081;
+        //int port = 8081;
+        int port = wireMockServer.port();
+        System.out.println("Movies Port : " + port);
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
         moviesRestClient = new MoviesRestClient(baseUrl, webClient);
@@ -28,6 +47,14 @@ public class MoviesServiceTest {
 
     @Test
     void getAllMovies() {
+
+        //given
+        String fileName = "all-movies.json";
+        String responseBody = TestHelper.readFromPath(fileName);
+        WireMock.stubFor(WireMock.get(WireMock.anyUrl())
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(responseBody)));
 
         //when
         List<Movie> movieList = moviesRestClient.retrieveAllMovies();
@@ -157,7 +184,7 @@ public class MoviesServiceTest {
         Integer movieId = 100;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class,()-> moviesRestClient.updateMovie(movieId, darkNightRises));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.updateMovie(movieId, darkNightRises));
     }
 
     @Test
@@ -167,7 +194,7 @@ public class MoviesServiceTest {
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
         Movie movie = moviesRestClient.addNewMovie(toyStory);
-        Integer movieId=movie.getMovie_id().intValue();
+        Integer movieId = movie.getMovie_id().intValue();
 
         //when
         String response = moviesRestClient.deleteMovieById(movieId);
@@ -182,10 +209,10 @@ public class MoviesServiceTest {
     void deleteMovie_notFound() {
 
         //given
-        Integer movieId=100;
+        Integer movieId = 100;
 
         //when
-        Assertions.assertThrows(MovieErrorResponse.class, ()-> moviesRestClient.deleteMovieById(movieId)) ;
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.deleteMovieById(movieId));
 
     }
 
