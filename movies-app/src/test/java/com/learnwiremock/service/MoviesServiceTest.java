@@ -1,29 +1,44 @@
 package com.learnwiremock.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
-import org.junit.Before;
-import org.junit.Test;
+import com.learnwiremock.helper.TestHelper;
+import org.junit.jupiter.api.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MoviesServiceTest {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
-    ObjectMapper objectMapper = new ObjectMapper();
+    static WireMockServer wireMockServer = new WireMockServer();
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    static void start() {
+        wireMockServer.start();
+
+    }
+
+    @AfterAll
+    static void shutDown() {
+        wireMockServer.shutdown();
+    }
+
+
+    @BeforeEach
+    void setUp() {
         int port = 8081;
+       // int port = wireMockServer.port();
+        System.out.println("Movies Port : " + port);
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
         moviesRestClient = new MoviesRestClient(baseUrl, webClient);
@@ -31,9 +46,15 @@ public class MoviesServiceTest {
     }
 
     @Test
-    public void getAllMovies() {
+    void getAllMovies() {
 
         //given
+        String fileName = "all-movies.json";
+        String responseBody = TestHelper.readFromPath(fileName);
+        WireMock.stubFor(WireMock.get(WireMock.anyUrl())
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(responseBody)));
 
         //when
         List<Movie> movieList = moviesRestClient.retrieveAllMovies();
@@ -44,7 +65,7 @@ public class MoviesServiceTest {
     }
 
     @Test
-    public void retrieveMovieById() {
+    void retrieveMovieById() {
         //given
         Integer movieId = 1;
 
@@ -55,18 +76,18 @@ public class MoviesServiceTest {
         assertEquals("Batman Begins", movie.getName());
     }
 
-    @Test(expected = MovieErrorResponse.class)
-    public void retrieveMovieById_NotFound() {
+    @Test
+    void retrieveMovieById_NotFound() {
         //given
         Integer movieId = 100;
 
         //when
-        moviesRestClient.retrieveMovieById(movieId);
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieById(movieId));
 
     }
 
     @Test
-    public void retrieveMovieByName() {
+    void retrieveMovieByName() {
         //given
         String movieName = "Avengers";
 
@@ -79,18 +100,18 @@ public class MoviesServiceTest {
         assertEquals(expectedCastName, movieList.get(0).getCast());
     }
 
-    @Test(expected = MovieErrorResponse.class)
-    public void retrieveMovieByName_Not_Found() {
+    @Test
+    void retrieveMovieByName_Not_Found() {
         //given
         String movieName = "ABC";
 
         //when
-        moviesRestClient.retrieveMovieByName(movieName);
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieByName(movieName));
     }
 
 
     @Test
-    public void retrieveMovieByYear() {
+    void retrieveMovieByYear() {
         //given
         Integer year = 2012;
 
@@ -102,18 +123,18 @@ public class MoviesServiceTest {
 
     }
 
-    @Test(expected = MovieErrorResponse.class)
-    public void retrieveMovieByYear_Not_Found() {
+    @Test
+    void retrieveMovieByYear_Not_Found() {
         //given
         Integer year = 1950;
 
         //when
-        moviesRestClient.retreieveMovieByYear(year);
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retreieveMovieByYear(year));
 
     }
 
     @Test
-    public void addNewMovie() {
+    void addNewMovie() {
         //given
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
@@ -126,19 +147,20 @@ public class MoviesServiceTest {
 
     }
 
-    @Test(expected = MovieErrorResponse.class)
-    public void addNewMovie_InvalidInput() {
+    @Test
+    @DisplayName("Passing the Movie name and year as Null")
+    void addNewMovie_InvlaidInput() {
         //given
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, null, null, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
 
         //when
-        moviesRestClient.addNewMovie(toyStory);
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.addNewMovie(toyStory));
 
     }
 
     @Test
-    public void updateMovie() {
+    void updateMovie() {
         //given
         String darkNightRisesCrew = "Tom Hardy";
         Movie darkNightRises = new Movie(null, null, null, darkNightRisesCrew, null);
@@ -149,24 +171,24 @@ public class MoviesServiceTest {
 
         //then
         String updatedCastName = "Christian Bale, Heath Ledger , Michael Caine, Tom Hardy";
-        assertTrue(updatedMovie.getCast().contains("Tom Hardy"));
+        assertTrue(updatedMovie.getCast().contains(darkNightRisesCrew));
 
 
     }
 
-    @Test(expected = MovieErrorResponse.class)
-    public void updateMovie_Not_Found() {
+    @Test
+    void updateMovie_Not_Found() {
         //given
         String darkNightRisesCrew = "Tom Hardy";
         Movie darkNightRises = new Movie(null, null, null, darkNightRisesCrew, null);
         Integer movieId = 100;
 
         //when
-         moviesRestClient.updateMovie(movieId, darkNightRises);
+        Assertions.assertThrows(MovieErrorResponse.class,()-> moviesRestClient.updateMovie(movieId, darkNightRises));
     }
 
     @Test
-    public void deleteMovie() {
+    void deleteMovie() {
 
         //given
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
@@ -183,16 +205,22 @@ public class MoviesServiceTest {
 
     }
 
-    @Test(expected = MovieErrorResponse.class)
-    public void deleteMovie_notFound() {
+    @Test
+    void deleteMovie_notFound() {
 
         //given
         Integer movieId=100;
 
         //when
-        moviesRestClient.deleteMovieById(movieId) ;
+        Assertions.assertThrows(MovieErrorResponse.class, ()-> moviesRestClient.deleteMovieById(movieId)) ;
 
     }
 
+
+    @Test
+    @Disabled
+    void getAllMovies_Exception() {
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+    }
 
 }
