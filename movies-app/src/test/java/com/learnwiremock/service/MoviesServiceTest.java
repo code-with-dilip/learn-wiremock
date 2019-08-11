@@ -1,7 +1,5 @@
 package com.learnwiremock.service;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import com.learnwiremock.helper.TestHelper;
@@ -20,24 +18,10 @@ public class MoviesServiceTest {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
-    static WireMockServer wireMockServer = new WireMockServer();
-
-    @BeforeAll
-    static void start() {
-        wireMockServer.start();
-
-    }
-
-    @AfterAll
-    static void shutDown() {
-        wireMockServer.shutdown();
-    }
-
 
     @BeforeEach
     void setUp() {
         int port = 8081;
-       // int port = wireMockServer.port();
         System.out.println("Movies Port : " + port);
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
@@ -47,15 +31,6 @@ public class MoviesServiceTest {
 
     @Test
     void getAllMovies() {
-
-        //given
-        String fileName = "all-movies.json";
-        String responseBody = TestHelper.readFromPath(fileName);
-        WireMock.stubFor(WireMock.get(WireMock.anyUrl())
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(responseBody)));
-
         //when
         List<Movie> movieList = moviesRestClient.retrieveAllMovies();
         System.out.println("movieList : " + movieList);
