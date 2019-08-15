@@ -1,11 +1,17 @@
 package com.learnwiremock.service;
 
+import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
+import com.github.jenspiegsa.wiremockextension.InjectServer;
+import com.github.jenspiegsa.wiremockextension.WireMockExtension;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
+import com.github.tomakehurst.wiremock.core.Options;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import com.learnwiremock.helper.TestHelper;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,31 +19,29 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static com.learnwiremock.constants.MovieAppConstants.GET_ALL_MOVIES_V1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(WireMockExtension.class)
 public class MoviesServiceTest {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
-    static WireMockServer wireMockServer = new WireMockServer();
 
-    @BeforeAll
-    static void start() {
-        wireMockServer.start();
+    @InjectServer
+    WireMockServer wireMockServer;
 
-    }
-
-    @AfterAll
-    static void shutDown() {
-        wireMockServer.shutdown();
-    }
-
+    @ConfigureWireMock
+    Options options = wireMockConfig()
+            .port(8088)
+            .notifier(new ConsoleNotifier(true));
 
     @BeforeEach
     void setUp() {
-        int port = 8081;
-       // int port = wireMockServer.port();
+        //int port = 8081;
+       int port = wireMockServer.port();
         System.out.println("Movies Port : " + port);
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
@@ -52,6 +56,25 @@ public class MoviesServiceTest {
         String fileName = "all-movies.json";
         String responseBody = TestHelper.readFromPath(fileName);
         WireMock.stubFor(WireMock.get(WireMock.anyUrl())
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(responseBody)));
+
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
+        System.out.println("movieList : " + movieList);
+
+        //then
+        assertTrue(!movieList.isEmpty());
+    }
+
+    @Test
+    void getAllMovies_urlEqualTo() {
+
+        //given
+        String fileName = "all-movies.json";
+        String responseBody = TestHelper.readFromPath(fileName);
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(GET_ALL_MOVIES_V1))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(responseBody)));
