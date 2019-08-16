@@ -41,8 +41,7 @@ public class MoviesServiceTest {
     @BeforeEach
     void setUp() {
         //int port = 8081;
-       int port = wireMockServer.port();
-        System.out.println("Movies Port : " + port);
+       int port = options.portNumber();
         final String baseUrl = String.format("http://localhost:%s", port);
         webClient = WebClient.create();
         moviesRestClient = new MoviesRestClient(baseUrl, webClient);
