@@ -29,6 +29,8 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.26'
     implementation 'org.slf4j:slf4j-simple:1.7.26'
 
+    //wiremock
+    testCompile "com.github.tomakehurst:wiremock-jre8-standalone:2.24.1"
 
     //jackson
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'

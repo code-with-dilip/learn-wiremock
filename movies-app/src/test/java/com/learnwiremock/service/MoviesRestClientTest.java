@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(WireMockExtension.class)
-public class MoviesServiceTest {
+class MoviesServiceTest {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
@@ -40,11 +40,10 @@ public class MoviesServiceTest {
 
     @BeforeEach
     void setUp() {
-        //int port = 8081;
-       int port = options.portNumber();
-        final String baseUrl = String.format("http://localhost:%s", port);
-        webClient = WebClient.create();
-        moviesRestClient = new MoviesRestClient(baseUrl, webClient);
+        int port = 8081;
+        final String baseUrl = String.format("http://localhost:%s/movieservice", port);
+        webClient = WebClient.create(baseUrl);
+        moviesRestClient = new MoviesRestClient(webClient);
 
     }
 
@@ -55,25 +54,6 @@ public class MoviesServiceTest {
         String fileName = "all-movies.json";
         String responseBody = TestHelper.readFromPath(fileName);
         WireMock.stubFor(WireMock.get(WireMock.anyUrl())
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(responseBody)));
-
-        //when
-        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
-        System.out.println("movieList : " + movieList);
-
-        //then
-        assertTrue(!movieList.isEmpty());
-    }
-
-    @Test
-    void getAllMovies_urlEqualTo() {
-
-        //given
-        String fileName = "all-movies.json";
-        String responseBody = TestHelper.readFromPath(fileName);
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(GET_ALL_MOVIES_V1))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(responseBody)));
