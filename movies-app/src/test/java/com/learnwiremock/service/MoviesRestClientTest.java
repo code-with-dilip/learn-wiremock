@@ -19,13 +19,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.learnwiremock.constants.MovieAppConstants.GET_ALL_MOVIES_V1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(WireMockExtension.class)
-class MoviesServiceTest {
+class MoviesRestClientTest {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
@@ -40,8 +41,9 @@ class MoviesServiceTest {
 
     @BeforeEach
     void setUp() {
-        int port = 8081;
-        final String baseUrl = String.format("http://localhost:%s/movieservice", port);
+        //int port = 8081;
+        int port =options.portNumber();
+        final String baseUrl = String.format("http://localhost:%s/", port);
         webClient = WebClient.create(baseUrl);
         moviesRestClient = new MoviesRestClient(webClient);
 
@@ -53,7 +55,26 @@ class MoviesServiceTest {
         //given
         String fileName = "all-movies.json";
         String responseBody = TestHelper.readFromPath(fileName);
-        WireMock.stubFor(WireMock.get(WireMock.anyUrl())
+
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(responseBody)));
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
+        System.out.println("movieList : " + movieList);
+
+        //then
+        assertTrue(!movieList.isEmpty());
+    }
+
+    @Test
+    void getAllMovies_matchUrl() {
+
+        //given
+        String fileName = "all-movies.json";
+        String responseBody = TestHelper.readFromPath(fileName);
+        stubFor(get(urlPathEqualTo(GET_ALL_MOVIES_V1))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(responseBody)));
@@ -65,6 +86,7 @@ class MoviesServiceTest {
         //then
         assertTrue(!movieList.isEmpty());
     }
+
 
     @Test
     void retrieveMovieById() {

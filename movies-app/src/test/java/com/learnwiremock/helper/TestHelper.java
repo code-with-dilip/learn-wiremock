@@ -17,7 +17,7 @@ public class TestHelper {
                     .map((line) -> line.trim())
                     .collect(Collectors.joining());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e);
         }
         return data;
     }
