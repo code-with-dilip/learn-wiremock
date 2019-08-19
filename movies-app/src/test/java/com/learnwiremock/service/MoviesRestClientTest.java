@@ -22,7 +22,7 @@ public class MoviesRestClientTest {
     @BeforeEach
     void setUp() {
         int port = 8081;
-        final String baseUrl = String.format("http://localhost:%s/movieservice", port);
+        final String baseUrl = String.format("http://localhost:%s/", port);
         webClient = WebClient.create(baseUrl);
         moviesRestClient = new MoviesRestClient(webClient);
 
