@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.learnwiremock.constants.MovieAppConstants.GET_ALL_MOVIES_V1;
 import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_ID_PATH_PARAM_V1;
+import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_NAME_QUERY_PARAM_V1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -87,7 +89,7 @@ class MoviesRestClientTest {
     void retrieveMovieById() {
 
         //given
-        stubFor(get(urlMatching("/movieservice/v1/movie/([0-9])*"))
+        stubFor(get(urlMatching("/movieservice/v1/movie/([0-9])"))
                 .willReturn(WireMock.aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("movie.json")));
@@ -112,10 +114,37 @@ class MoviesRestClientTest {
 
     }
 
+
     @Test
     void retrieveMovieByName() {
         //given
         String movieName = "Avengers";
+        stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .withQueryParam("movie_name", equalTo(movieName))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("avengers.json")));
+
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
+
+        //then
+        String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
+        assertEquals(4, movieList.size());
+        assertEquals(expectedCastName, movieList.get(0).getCast());
+    }
+
+
+    @Test
+    @Disabled
+    void retrieveMovieByName_UrlEqualTo() {
+        //given
+        String movieName = "Avengers";
+        stubFor(get(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .withQueryParam("movie_name", equalTo(movieName))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("avengers.json")));
 
         //when
         List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
