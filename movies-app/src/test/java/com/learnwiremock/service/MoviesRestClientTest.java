@@ -1,5 +1,7 @@
 package com.learnwiremock.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
 import com.github.jenspiegsa.wiremockextension.InjectServer;
 import com.github.jenspiegsa.wiremockextension.WireMockExtension;
@@ -21,9 +23,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static com.learnwiremock.constants.MovieAppConstants.GET_ALL_MOVIES_V1;
-import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_ID_PATH_PARAM_V1;
-import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_NAME_QUERY_PARAM_V1;
+import static com.learnwiremock.constants.MovieAppConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,6 +35,8 @@ class MoviesRestClientTest {
 
     @InjectServer
     WireMockServer wireMockServer;
+
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @ConfigureWireMock
     Options options = wireMockConfig()
@@ -168,6 +170,11 @@ class MoviesRestClientTest {
     void retrieveMovieByYear() {
         //given
         Integer year = 2012;
+        stubFor(get(urlPathEqualTo(MOVIE_BY_YEAR_QUERY_PARAM_V1))
+                .withQueryParam("year", equalTo(year.toString()))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("2012.json")));
 
         //when
         List<Movie> movieList = moviesRestClient.retreieveMovieByYear(year);
@@ -188,10 +195,16 @@ class MoviesRestClientTest {
     }
 
     @Test
-    void addNewMovie() {
+    void addNewMovie() throws JsonProcessingException {
         //given
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
+        stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
+                .withRequestBody(matchingJsonPath("$..name", equalTo("Toy Story 4")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("2012.json")));
+
 
         //when
         Movie movie = moviesRestClient.addNewMovie(toyStory);
