@@ -124,7 +124,6 @@ public class MoviesRestClient {
      */
     public Movie addNewMovie(Movie newMovie) {
         Movie movie;
-
         try {
             movie = webClient.post().uri( ADD_MOVIE_V1)
                     .syncBody(newMovie)
