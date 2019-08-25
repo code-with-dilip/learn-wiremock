@@ -37,6 +37,11 @@ public class MoviesController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Movie Available with the given name - "+ name);
     };
 
+    Function<Integer,ResponseStatusException > notFoundYear = (id) -> {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Movie Available with the given year - "+ id);
+    };
+
+
     Supplier<ResponseStatusException > serverError = () -> {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "RunTimeException from Movie Service");
     };
@@ -126,7 +131,7 @@ public class MoviesController {
         List<Movie> movies = moviesRepository.findByYear(year);
         if (CollectionUtils.isEmpty(movies)) {
             log.info("No Movie available for the given Movie Year - {}.", year);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw notFoundYear.apply(year);
         } else {
             log.info("Response is : {}", movies);
             return ResponseEntity.status(HttpStatus.OK).body(movies);
