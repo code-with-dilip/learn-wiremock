@@ -209,7 +209,7 @@ class MoviesRestClientTest {
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
         stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
-                .withRequestBody(matchingJsonPath("$..name", equalTo("Toy Story 4")))
+                .withRequestBody(matchingJsonPath("$.name", equalTo("Toy Story 4")))
                 .willReturn(WireMock.aResponse()
                         .withStatus(201)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
