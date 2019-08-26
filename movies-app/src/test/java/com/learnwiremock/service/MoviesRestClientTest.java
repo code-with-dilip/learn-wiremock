@@ -37,8 +37,6 @@ class MoviesRestClientTest {
     @InjectServer
     WireMockServer wireMockServer;
 
-    ObjectMapper objectMapper = new ObjectMapper();
-
     @ConfigureWireMock
     Options options = wireMockConfig()
             .port(8088)
@@ -47,7 +45,7 @@ class MoviesRestClientTest {
     @BeforeEach
     void setUp() {
         //int port = 8081;
-        int port = options.portNumber();
+        int port = wireMockServer.port();
         final String baseUrl = String.format("http://localhost:%s/", port);
         webClient = WebClient.create(baseUrl);
         moviesRestClient = new MoviesRestClient(webClient);
@@ -392,13 +390,6 @@ class MoviesRestClientTest {
         //when
         Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.deleteMovieById(movieId));
 
-    }
-
-
-    @Test
-    @Disabled
-    void getAllMovies_Exception() {
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
     }
 
 }
