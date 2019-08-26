@@ -94,11 +94,18 @@ class MoviesRestClientTest {
     void retrieveMovieById() {
 
         //given
-        stubFor(get(urlMatching("/movieservice/v1/movie/([0-9])"))
+        stubFor(get(urlMatching("/movieservice/v1/movie/1"))
+                .atPriority(1)
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("movie.json")));
+        stubFor(get(urlMatching("/movieservice/v1/movie/([0-9])"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("movie1.json")));
+
 
         //given
         Integer movieId = 1;
