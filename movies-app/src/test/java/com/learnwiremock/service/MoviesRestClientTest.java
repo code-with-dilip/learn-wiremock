@@ -92,6 +92,27 @@ class MoviesRestClientTest {
     void retrieveMovieById() {
 
         //given
+        stubFor(get(urlMatching("/movieservice/v1/movie/([0-9])"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("movie.json")));
+
+
+        //given
+        Integer movieId = 1;
+
+        //when
+        Movie movie = moviesRestClient.retrieveMovieById(movieId);
+
+        //then
+        assertEquals("Batman Begins", movie.getName());
+    }
+
+    @Test
+    void retrieveMovieById_WithPriority() {
+
+        //given
         stubFor(get(urlMatching("/movieservice/v1/movie/1"))
                 .atPriority(1)
                 .willReturn(WireMock.aResponse()
@@ -107,12 +128,15 @@ class MoviesRestClientTest {
 
         //given
         Integer movieId = 1;
+        Integer movieId1 = 2;
 
         //when
         Movie movie = moviesRestClient.retrieveMovieById(movieId);
+        Movie movie1 = moviesRestClient.retrieveMovieById(movieId1);
 
         //then
         assertEquals("Batman Begins", movie.getName());
+        assertEquals("Batman Begins1", movie1.getName());
     }
 
     @Test
