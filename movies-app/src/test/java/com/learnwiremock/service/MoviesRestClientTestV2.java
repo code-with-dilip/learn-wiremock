@@ -1,18 +1,11 @@
 package com.learnwiremock.service;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.learnwiremock.dto.Movie;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,19 +14,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_NAME_QUERY_PARAM_V1;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MoviesRestClientTestV2 {
+public class MoviesRestClientTestV2 {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    public WireMockRule wireMockRule = new WireMockRule(8088);
 
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         //int port = 8081;
         int port = wireMockRule.port();
         final String baseUrl = String.format("http://localhost:%s/", port);
@@ -44,7 +38,7 @@ class MoviesRestClientTestV2 {
     }
 
     @Test
-    void getAllMovies() {
+    public void getAllMovies() {
 
         //given
         stubFor(get(WireMock.anyUrl())
@@ -60,5 +54,24 @@ class MoviesRestClientTestV2 {
         assertTrue(!movieList.isEmpty());
     }
 
+    @Test
+    public void retrieveMovieByName() {
+        //given
+        String movieName = "Avengers";
+        stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .withQueryParam("movie_name", equalTo(movieName))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("avengers.json")));
+
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
+
+        //then
+        String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
+        assertEquals(4, movieList.size());
+        assertEquals(expectedCastName, movieList.get(0).getCast());
+    }
 
 }
