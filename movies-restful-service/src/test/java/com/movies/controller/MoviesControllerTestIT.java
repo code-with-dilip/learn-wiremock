@@ -270,12 +270,31 @@ public class MoviesControllerTestIT {
                 .isEqualTo(MoviesConstants.DELETE_MESSAGE);
     }
 
+
     @Test
     void deleteMovie_invalidMovieId() {
 
         webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1), 2000)
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    void deleteMovieByName() {
+
+        webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1), "DarK Knight")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Void.class);
+    }
+
+    @Test
+    void deleteMovieByName_invalid_movie_name() {
+
+        webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1), "DarK Knight1")
+                .exchange()
+                .expectStatus().isNotFound();
+
     }
 
 
