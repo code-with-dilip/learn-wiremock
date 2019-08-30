@@ -184,4 +184,24 @@ public class MoviesRestClient {
        return response;
 
     }
+
+    public String deleteMovieByName(String movieName) {
+
+
+        try {
+            webClient.delete().uri( MOVIE_BY_NAME_PATH_PARAM_V1, movieName)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .block();
+        }catch (WebClientResponseException ex) {
+            log.error("WebClientResponseException - Error Message is : {}", ex, ex.getResponseBodyAsString());
+            throw new MovieErrorResponse(ex.getStatusText(), ex);
+        } catch (Exception ex) {
+            log.error("Exception - The Error Message is {} ", ex.getMessage());
+            throw new MovieErrorResponse(ex);
+        }
+
+        return "Movie Deleted SuccessFully";
+
+    }
 }

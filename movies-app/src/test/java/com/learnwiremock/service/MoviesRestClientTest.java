@@ -190,11 +190,32 @@ public class MoviesRestClientTest {
 
     }
 
+    @Test
+    void deleteMovieByName() {
+
+        //given
+        //given
+        String toyStoryCrew = "Tom Hanks, Tim Allen";
+        Movie toyStory = new Movie(null, "Toy Story 5", 2019, toyStoryCrew, LocalDate.of(2019, 06, 20));
+        Movie movie = moviesRestClient.addNewMovie(toyStory);
+
+        //when
+        String responseMessage = moviesRestClient.deleteMovieByName(movie.getName());
+
+        assertEquals("Movie Deleted SuccessFully", responseMessage);
+
+    }
 
     @Test
-    @Disabled
-    void getAllMovies_Exception() {
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+    void deleteMovieByName_NotFound() {
+
+        //given
+        String movieName= "ABC";
+
+        //then
+        Assertions.assertThrows(MovieErrorResponse.class,() -> moviesRestClient.deleteMovieByName(movieName));
+
     }
+
 
 }
