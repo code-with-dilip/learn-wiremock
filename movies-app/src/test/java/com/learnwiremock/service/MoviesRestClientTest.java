@@ -271,8 +271,9 @@ class MoviesRestClientTest {
         //given
         String batmanBeginsCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
+
+
         stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
-                //.withRequestBody(matchingJsonPath("$..name", containing("Toy Story 4")))
                 .withRequestBody(matchingJsonPath(("$.name"), equalTo("Toy Story 4")))
                 .withRequestBody(matchingJsonPath(("$.cast"), containing("Tom")))
                 .willReturn(WireMock.aResponse()
@@ -418,7 +419,16 @@ class MoviesRestClientTest {
     void deleteMovieByName() {
 
         //given
-        //given
+        stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
+                .withRequestBody(matchingJsonPath("$.name", equalTo("Toy Story 5")))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.CREATED.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("toystory.json")));
+
+        stubFor(delete(urlPathMatching("/movieservice/v1/movieName/.*"))
+                .willReturn(WireMock.ok()));
+
         String toyStoryCrew = "Tom Hanks, Tim Allen";
         Movie toyStory = new Movie(null, "Toy Story 5", 2019, toyStoryCrew, LocalDate.of(2019, 06, 20));
         Movie movie = moviesRestClient.addNewMovie(toyStory);
@@ -426,7 +436,12 @@ class MoviesRestClientTest {
         //when
         String responseMessage = moviesRestClient.deleteMovieByName(movie.getName());
 
+        //then
         assertEquals("Movie Deleted SuccessFully", responseMessage);
+
+        verify(exactly(1), postRequestedFor(urlPathEqualTo(ADD_MOVIE_V1))
+                .withRequestBody(matchingJsonPath("$.name", equalTo("Toy Story 5"))));
+        verify(exactly(1), deleteRequestedFor((urlPathMatching("/movieservice/v1/movieName/.*"))));
 
     }
 
