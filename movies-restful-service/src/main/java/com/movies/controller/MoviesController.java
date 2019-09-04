@@ -186,6 +186,7 @@ public class MoviesController {
                     @ApiResponse(code = 404, message = "No movie found for the year that's passed."),
             }
     )
+
     @DeleteMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
     public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
 
@@ -200,6 +201,19 @@ public class MoviesController {
             throw notFoundId.apply(id);
         }
 
+
+    }
+
+    @DeleteMapping(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1)
+    public ResponseEntity<?> deleteMovieByName(@PathVariable String name) {
+        log.info("Received the request to delete a movie and the id is {} .", name);
+        log.info("Movie " + moviesRepository.findMovieByName(name));
+        if(CollectionUtils.isEmpty(moviesRepository.findMovieByName(name))){
+            throw notFoundName.apply(name);
+        }else{
+            moviesRepository.deleteByName(name);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
 
     }
 
