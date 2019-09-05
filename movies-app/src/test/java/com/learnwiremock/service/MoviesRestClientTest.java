@@ -171,7 +171,7 @@ class MoviesRestClientTest {
         stubFor(get(urlPathMatching("/movieservice/v1/movie/([0-9]+)"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withBodyFile("404.json")));
+                        .withBodyFile("404-movieId.json")));
 
 
         //when
@@ -206,10 +206,9 @@ class MoviesRestClientTest {
         //given
         String movieName = "ABC";
         stubFor(get(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name="+movieName))
-                .withQueryParam("movie_name", equalTo(movieName))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withBodyFile("404.json")));
+                        .withBodyFile("404-moviename.json")));
 
         //when
         Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieByName(movieName));
@@ -220,7 +219,7 @@ class MoviesRestClientTest {
         //given
         String movieName = "Avengers";
         stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
-                .withQueryParam("movie_name", equalTo(movieName))
+               // .withQueryParam("movie_name", equalTo(movieName))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
