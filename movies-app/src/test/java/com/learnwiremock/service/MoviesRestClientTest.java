@@ -91,6 +91,7 @@ class MoviesRestClientTest {
     void retrieveMovieById() {
 
         //given
+       // stubFor(get(urlPathMatching("/movieservice/v1/movie/1"))
         stubFor(get(urlPathMatching("/movieservice/v1/movie/([0-9])"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
