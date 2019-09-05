@@ -93,7 +93,7 @@ class MoviesRestClientTest {
     void retrieveMovieById() {
 
         //given
-       // stubFor(get(urlPathMatching("/movieservice/v1/movie/1"))
+        //stubFor(get(urlPathEqualTo("/movieservice/v1/movie/1"))
         stubFor(get(urlPathMatching("/movieservice/v1/movie/[0-9]"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -115,7 +115,6 @@ class MoviesRestClientTest {
     void retrieveMovieById_withResponseTemplating() {
 
         //given
-        // stubFor(get(urlPathMatching("/movieservice/v1/movie/1"))
         stubFor(get(urlPathMatching("/movieservice/v1/movie/[0-9]+"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -124,7 +123,7 @@ class MoviesRestClientTest {
 
 
         //given
-        Integer movieId = 100;
+        Integer movieId = 200;
 
         //when
         Movie movie = moviesRestClient.retrieveMovieById(movieId);
@@ -139,7 +138,7 @@ class MoviesRestClientTest {
     void retrieveMovieById_WithPriority() {
 
         //given
-        stubFor(get(urlMatching("/movieservice/v1/movie/1"))
+        stubFor(get(urlPathMatching("/movieservice/v1/movie/1"))
                 .atPriority(1)
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -169,7 +168,7 @@ class MoviesRestClientTest {
     void retrieveMovieById_NotFound() {
         //given
         Integer movieId = 100;
-        stubFor(get(urlMatching("/movieservice/v1/movie/([0-9]+)"))
+        stubFor(get(urlPathMatching("/movieservice/v1/movie/([0-9]+)"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.NOT_FOUND.value())
                         .withBodyFile("404.json")));
@@ -201,6 +200,21 @@ class MoviesRestClientTest {
         assertEquals(expectedCastName, movieList.get(0).getCast());
     }
 
+
+    @Test
+    void retrieveMovieByName_Not_Found() {
+        //given
+        String movieName = "ABC";
+        stubFor(get(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name="+movieName))
+                .withQueryParam("movie_name", equalTo(movieName))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.NOT_FOUND.value())
+                        .withBodyFile("404.json")));
+
+        //when
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieByName(movieName));
+    }
+
     @Test
     void retrieveMovieByName_urlPathEqualTo() {
         //given
@@ -222,19 +236,6 @@ class MoviesRestClientTest {
     }
 
 
-    @Test
-    void retrieveMovieByName_Not_Found() {
-        //given
-        String movieName = "ABC";
-        stubFor(get(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name="+movieName))
-                .withQueryParam("movie_name", equalTo(movieName))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withBodyFile("404.json")));
-
-        //when
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieByName(movieName));
-    }
 
 
     @Test
@@ -245,7 +246,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("2012.json")));
+                        .withBodyFile("year.json")));
 
         //when
         List<Movie> movieList = moviesRestClient.retreieveMovieByYear(year);
