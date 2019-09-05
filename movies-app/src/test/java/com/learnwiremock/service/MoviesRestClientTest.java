@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import org.junit.jupiter.api.*;
@@ -38,7 +39,8 @@ class MoviesRestClientTest {
     @ConfigureWireMock
     Options options = wireMockConfig()
             .port(8088)
-            .notifier(new ConsoleNotifier(true));
+            .notifier(new ConsoleNotifier(true))
+            .extensions(new ResponseTemplateTransformer(true));
 
     @BeforeEach
     void setUp() {
@@ -92,7 +94,7 @@ class MoviesRestClientTest {
 
         //given
        // stubFor(get(urlPathMatching("/movieservice/v1/movie/1"))
-        stubFor(get(urlPathMatching("/movieservice/v1/movie/([0-9])"))
+        stubFor(get(urlPathMatching("/movieservice/v1/movie/[0-9]"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -109,23 +111,29 @@ class MoviesRestClientTest {
         assertEquals("Batman Begins", movie.getName());
     }
 
-   /* @Test
-    void getAllMovies_matchUrl() {
+    @Test
+    void retrieveMovieById_withResponseTemplating() {
 
         //given
-        stubFor(get(urlEqualTo(GET_ALL_MOVIES_V1))
+        // stubFor(get(urlPathMatching("/movieservice/v1/movie/1"))
+        stubFor(get(urlPathMatching("/movieservice/v1/movie/[0-9]+"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("all-movies.json")));
+                        .withBodyFile("movie-template.json")));
+
+
+        //given
+        Integer movieId = 100;
 
         //when
-        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
-        System.out.println("movieList : " + movieList);
-
+        Movie movie = moviesRestClient.retrieveMovieById(movieId);
         //then
-        assertTrue(!movieList.isEmpty());
-    }*/
+        assertEquals("Batman Begins", movie.getName());
+        assertEquals(movieId, movie.getMovie_id().intValue());
+    }
+
+
 
     @Test
     void retrieveMovieById_WithPriority() {
@@ -194,7 +202,7 @@ class MoviesRestClientTest {
     }
 
     @Test
-    void retrieveMovieByName() {
+    void retrieveMovieByName_urlPathEqualTo() {
         //given
         String movieName = "Avengers";
         stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
