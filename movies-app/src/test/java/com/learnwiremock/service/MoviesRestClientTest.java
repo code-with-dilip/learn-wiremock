@@ -193,12 +193,12 @@ class MoviesRestClientTest {
         assertEquals(expectedCastName, movieList.get(0).getCast());
     }
 
-  /*  @Test
+    @Test
     void retrieveMovieByName() {
         //given
         String movieName = "Avengers";
-        stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name="+movieName))
-                //.withQueryParam("movie_name", equalTo(movieName))
+        stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .withQueryParam("movie_name", equalTo(movieName))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -212,7 +212,7 @@ class MoviesRestClientTest {
         assertEquals(4, movieList.size());
         assertEquals(expectedCastName, movieList.get(0).getCast());
     }
-*/
+
 
     @Test
     void retrieveMovieByName_Not_Found() {
