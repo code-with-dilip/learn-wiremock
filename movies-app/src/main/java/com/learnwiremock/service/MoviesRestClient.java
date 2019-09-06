@@ -107,7 +107,7 @@ public class MoviesRestClient {
                     .collectList()
                     .block();
         } catch (WebClientResponseException ex) {
-            log.error("WebClientResponseException in retreieveMovieByYear - Error Message is : {} ", ex, ex.getResponseBodyAsString());
+            log.error("WebClientResponseException in retreieveMovieByYear {} and the Error Message is : {} ", ex, ex.getResponseBodyAsString());
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
             log.error("Exception - The Error Message is {} ", ex.getMessage());
