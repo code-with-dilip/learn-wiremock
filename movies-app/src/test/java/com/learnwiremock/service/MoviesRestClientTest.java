@@ -284,7 +284,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.CREATED.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("toystory.json")));
+                        .withBodyFile("add-movie.json")));
 
 
         //when
@@ -294,6 +294,8 @@ class MoviesRestClientTest {
         assertTrue(movie.getMovie_id() != null);
 
     }
+
+
 
     @Test
     void addNewMovie_matchingJsonAttributeValue() throws JsonProcessingException {
@@ -313,6 +315,30 @@ class MoviesRestClientTest {
 
         //when
         Movie movie = moviesRestClient.addNewMovie(toyStory);
+
+        //then
+        assertTrue(movie.getMovie_id() != null);
+
+    }
+
+    @Test
+    void addNewMovie_dynamicResponse() {
+        //given
+        String batmanBeginsCrew = "Tom Hanks, Tim Allen";
+        Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
+        stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
+                //.withRequestBody(matchingJsonPath("$..name", containing("Toy Story 4")))
+                .withRequestBody(matchingJsonPath(("$.name")))
+                .withRequestBody(matchingJsonPath(("$.cast")))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.CREATED.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("add-movie-template.json")));
+
+
+        //when
+        Movie movie = moviesRestClient.addNewMovie(toyStory);
+        System.out.println("movie : " + movie);
 
         //then
         assertTrue(movie.getMovie_id() != null);
