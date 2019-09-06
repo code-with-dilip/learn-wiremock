@@ -245,7 +245,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("year.json")));
+                        .withBodyFile("year-template.json")));
 
         //when
         List<Movie> movieList = moviesRestClient.retreieveMovieByYear(year);
