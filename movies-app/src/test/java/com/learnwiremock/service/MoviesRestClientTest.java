@@ -200,6 +200,29 @@ class MoviesRestClientTest {
         assertEquals(expectedCastName, movieList.get(0).getCast());
     }
 
+    @Test
+    void retrieveMovieByName_UrlPathEqualTo_approach2() {
+        //dont use urlPathEqualTo when there is queryParem involved.
+
+        //given
+        String movieName = "Avengers";
+        stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .withQueryParam("movie_name", equalTo(movieName))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("avengers.json")));
+
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
+
+        //then
+        String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
+        assertEquals(4, movieList.size());
+        assertEquals(expectedCastName, movieList.get(0).getCast());
+    }
+
+
 
     @Test
     void retrieveMovieByName_Not_Found() {
@@ -213,6 +236,28 @@ class MoviesRestClientTest {
         //when
         Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveMovieByName(movieName));
     }
+
+    @Test
+    void retrieveMovieByName_withResponseTemplating() {
+        //dont use urlPathEqualTo when there is queryParem involved.
+
+        //given
+        String movieName = "Avengers";
+        stubFor(get(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1 + "?movie_name=" + movieName))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("movie-byname-template.json")));
+
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
+        System.out.println("movieList : " + movieList);
+        //then
+        String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
+        assertEquals(4, movieList.size());
+        assertEquals(expectedCastName, movieList.get(0).getCast());
+    }
+
 
     @Test
     void retrieveMovieByName_urlPathEqualTo() {
@@ -245,7 +290,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("year.json")));
+                        .withBodyFile("year-template.json")));
 
         //when
         List<Movie> movieList = moviesRestClient.retreieveMovieByYear(year);
@@ -264,7 +309,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.NOT_FOUND.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("404.json")));
+                        .withBodyFile("404-movieyear.json")));
 
 
         //when
@@ -284,7 +329,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.CREATED.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("toystory.json")));
+                        .withBodyFile("add-movie.json")));
 
 
         //when
@@ -294,6 +339,8 @@ class MoviesRestClientTest {
         assertTrue(movie.getMovie_id() != null);
 
     }
+
+
 
     @Test
     void addNewMovie_matchingJsonAttributeValue() throws JsonProcessingException {
@@ -313,6 +360,30 @@ class MoviesRestClientTest {
 
         //when
         Movie movie = moviesRestClient.addNewMovie(toyStory);
+
+        //then
+        assertTrue(movie.getMovie_id() != null);
+
+    }
+
+    @Test
+    void addNewMovie_dynamicResponse() {
+        //given
+        String batmanBeginsCrew = "Tom Hanks, Tim Allen";
+        Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
+        stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
+                //.withRequestBody(matchingJsonPath("$..name", containing("Toy Story 4")))
+                .withRequestBody(matchingJsonPath(("$.name")))
+                .withRequestBody(matchingJsonPath(("$.cast")))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.CREATED.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("add-movie-template.json")));
+
+
+        //when
+        Movie movie = moviesRestClient.addNewMovie(toyStory);
+        System.out.println("movie : " + movie);
 
         //then
         assertTrue(movie.getMovie_id() != null);
