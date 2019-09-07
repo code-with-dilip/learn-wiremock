@@ -355,7 +355,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.CREATED.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("toystory.json")));
+                        .withBodyFile("add-movie.json")));
 
 
         //when
@@ -389,29 +389,6 @@ class MoviesRestClientTest {
         assertTrue(movie.getMovie_id() != null);
 
     }
-
-    @Test
-    void addNewMovie_wholeBodyEqual() {
-        //given
-        String batmanBeginsCrew = "Tom Hanks, Tim Allen";
-        Movie toyStory = new Movie(null, "Toy Story 4", 2019, batmanBeginsCrew, LocalDate.of(2019, 06, 20));
-        stubFor(post(urlPathEqualTo(ADD_MOVIE_V1))
-                //.withRequestBody(matchingJsonPath("$..name", containing("Toy Story 4")))
-                .withRequestBody(equalToJson("{\"movie_id\":null,\"name\":\"Toy Story 4\",\"year\":2019,\"cast\":\"Tom Hanks, Tim Allen\",\"release_date\":[2019,6,20]}"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HttpStatus.CREATED.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("toystory.json")));
-
-
-        //when
-        Movie movie = moviesRestClient.addNewMovie(toyStory);
-
-        //then
-        assertTrue(movie.getMovie_id() != null);
-
-    }
-
     @Test
     @DisplayName("Passing the Movie name and year as Null")
     void addNewMovie_InvlaidInput() {
@@ -479,7 +456,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.CREATED.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("toystory.json")));
+                        .withBodyFile("add-movie.json")));
 
         stubFor(delete(urlPathMatching("/movieservice/v1/movie/([0-9][0-9])"))
                 .willReturn(WireMock.aResponse()
@@ -524,7 +501,7 @@ class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.CREATED.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("toystory.json")));
+                        .withBodyFile("add-movie.json")));
 
         stubFor(delete(urlPathMatching("/movieservice/v1/movieName/.*"))
                 .willReturn(WireMock.ok()));
