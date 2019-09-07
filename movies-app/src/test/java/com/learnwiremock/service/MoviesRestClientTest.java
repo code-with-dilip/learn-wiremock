@@ -200,6 +200,29 @@ class MoviesRestClientTest {
         assertEquals(expectedCastName, movieList.get(0).getCast());
     }
 
+    @Test
+    void retrieveMovieByName_UrlPathEqualTo_approach2() {
+        //dont use urlPathEqualTo when there is queryParem involved.
+
+        //given
+        String movieName = "Avengers";
+        stubFor(get(urlPathEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1))
+                .withQueryParam("movie_name", equalTo(movieName))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("avengers.json")));
+
+        //when
+        List<Movie> movieList = moviesRestClient.retrieveMovieByName(movieName);
+
+        //then
+        String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
+        assertEquals(4, movieList.size());
+        assertEquals(expectedCastName, movieList.get(0).getCast());
+    }
+
+
 
     @Test
     void retrieveMovieByName_Not_Found() {
