@@ -413,12 +413,12 @@ class MoviesRestClientTest {
         String darkNightRisesCrew = "Tom Hardy";
         Movie darkNightRises = new Movie(null, null, null, darkNightRisesCrew, null);
         Integer movieId = 3;
-        stubFor(put(urlPathMatching("/movieservice/v1/movie/([0-9])"))
+        stubFor(put(urlPathMatching("/movieservice/v1/movie/([0-9]+)"))
                 .withRequestBody(matchingJsonPath("$.cast", equalTo(darkNightRisesCrew)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBodyFile("updatemovie.json")));
+                        .withBodyFile("updatemovie-template.json")));
 
 
         //when
@@ -437,7 +437,7 @@ class MoviesRestClientTest {
         String darkNightRisesCrew = "Tom Hardy";
         Movie darkNightRises = new Movie(null, null, null, darkNightRisesCrew, null);
         Integer movieId = 100;
-        stubFor(put(urlPathMatching("/movieservice/v1/movie/([0-9][0-9][0-9])"))
+        stubFor(put(urlPathMatching("/movieservice/v1/movie/([0-9]+)"))
                 .withRequestBody(matchingJsonPath("$.cast", equalTo(darkNightRisesCrew)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.NOT_FOUND.value())
