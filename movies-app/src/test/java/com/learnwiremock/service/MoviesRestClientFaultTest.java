@@ -8,7 +8,10 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
+import com.github.tomakehurst.wiremock.http.Fault;
 import com.learnwiremock.dto.Movie;
+import com.learnwiremock.exception.MovieErrorResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static com.learnwiremock.constants.MovieAppConstants.ADD_MOVIE_V1;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(WireMockExtension.class)
@@ -50,19 +56,77 @@ public class MoviesRestClientFaultTest {
     }
 
     @Test
-    void getAllMovies() {
+    void getAllMovies_internal_server_Error() {
 
         //given
         stubFor(get(WireMock.anyUrl())
-                .willReturn(WireMock.aResponse()
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withStatus(HttpStatus.OK.value())
-                        .withBodyFile("all-movies.json")));
+                .willReturn(serverError()));
         //whenx
-        List<Movie> movieList = moviesRestClient.retrieveAllMovies();
-        System.out.println("movieList : " + movieList);
+        /*List<Movie> movieList = moviesRestClient.retrieveAllMovies();*/
 
         //then
-        assertTrue(!movieList.isEmpty());
+        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
     }
+
+    @Test
+    void getAllMovies_503_error() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(serverError()
+                        .withStatus(HttpStatus.SERVICE_UNAVAILABLE.value())
+                        .withBody("Service Unavailable")));
+        //whenx
+        /*List<Movie> movieList = moviesRestClient.retrieveAllMovies();*/
+
+        //then
+        MovieErrorResponse errorResponse = assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+
+        assertEquals("Service Unavailable", errorResponse.getMessage());
+    }
+
+    @Test
+    void getAllMovies_fault_Response() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
+        //whenx
+        /*List<Movie> movieList = moviesRestClient.retrieveAllMovies();*/
+
+        //then
+        MovieErrorResponse movieErrorResponse = assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+        String expectedErrorMessage = "reactor.netty.http.client.PrematureCloseException: Connection prematurely closed BEFORE response";
+        assertEquals(expectedErrorMessage, movieErrorResponse.getMessage());
+
+    }
+
+    @Test
+    void getAllMovies_randomDataThenClose() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(aResponse().withFault(Fault.RANDOM_DATA_THEN_CLOSE)));
+        //whenx
+        /*List<Movie> movieList = moviesRestClient.retrieveAllMovies();*/
+
+        //then
+        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+
+    }
+
+   // @Test
+    void getAllMovies_connection_reset_by_peer() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+        //whenx
+        /*List<Movie> movieList = moviesRestClient.retrieveAllMovies();*/
+
+        //then
+        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+
+    }
+
 }

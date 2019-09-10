@@ -39,7 +39,7 @@ public class MoviesRestClient {
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
             log.error("Exception - The Error Message is {} ", ex.getMessage());
-            throw new MovieErrorResponse(ex);
+            throw new MovieErrorResponse(ex.getMessage(), ex);
         }
         return movieList;
     }
@@ -197,8 +197,6 @@ public class MoviesRestClient {
             log.error("Exception - The Error Message is {} ", ex.getMessage());
             throw new MovieErrorResponse(ex);
         }
-
         return "Movie Deleted SuccessFully";
-
     }
 }
