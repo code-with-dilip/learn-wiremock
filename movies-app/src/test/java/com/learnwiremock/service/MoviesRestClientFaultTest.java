@@ -100,6 +100,18 @@ public class MoviesRestClientFaultTest {
     }
 
     @Test
+    void getAllMovies_connection_reset_by_peer() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+        //then
+        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+
+    }
+
+    @Test
     void getAllMovies_fault_Response() {
 
         //given
@@ -119,18 +131,6 @@ public class MoviesRestClientFaultTest {
         //given
         stubFor(get(WireMock.anyUrl())
                 .willReturn(aResponse().withFault(Fault.RANDOM_DATA_THEN_CLOSE)));
-
-        //then
-        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
-
-    }
-
-    @Test
-    void getAllMovies_connection_reset_by_peer() {
-
-        //given
-        stubFor(get(WireMock.anyUrl())
-                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
 
         //then
         assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
