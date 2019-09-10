@@ -38,7 +38,7 @@ public class MoviesRestClient {
             log.error("WebClientResponseException - Error Message is : {} ", ex, ex.getResponseBodyAsString());
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
-            log.error("Exception - The Error Message is {} ", ex.getMessage());
+            log.error("Exception - The Error Message is {} and exception is ", ex.getMessage()+ ex);
             throw new MovieErrorResponse(ex.getMessage(), ex);
         }
         return movieList;
