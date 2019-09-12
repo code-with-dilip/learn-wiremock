@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Hooks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 
@@ -46,6 +47,7 @@ public class MoviesRestClientFaultTest {
     WireMockServer wireMockServer;
 
     TcpClient tcpClient = TcpClient.create()
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
             .doOnConnected(connection ->
                     connection.addHandlerLast(new ReadTimeoutHandler(5))
                             .addHandlerLast(new WriteTimeoutHandler(5)));
@@ -62,9 +64,9 @@ public class MoviesRestClientFaultTest {
         int port = wireMockServer.port();
         final String baseUrl = String.format("http://localhost:%s/", port);
 
-        webClient = WebClient.create(baseUrl);
-/*        webClient =  WebClient.builder().clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
-                .baseUrl(baseUrl).build();*/
+        //webClient = WebClient.create(baseUrl);
+        webClient =  WebClient.builder().clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
+                .baseUrl(baseUrl).build();
         moviesRestClient = new MoviesRestClient(webClient);
 
     }
@@ -100,18 +102,6 @@ public class MoviesRestClientFaultTest {
     }
 
     @Test
-    void getAllMovies_connection_reset_by_peer() {
-
-        //given
-        stubFor(get(WireMock.anyUrl())
-                .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
-
-        //then
-        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
-
-    }
-
-    @Test
     void getAllMovies_fault_Response() {
 
         //given
@@ -136,5 +126,32 @@ public class MoviesRestClientFaultTest {
         assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
 
     }
+
+    @Test
+    void getAllMovies_fixedDelay() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(ok()
+                .withFixedDelay(10000)));
+
+        //then
+        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+
+    }
+
+    @Test
+    void getAllMovies_RandaomDelay() {
+
+        //given
+        stubFor(get(WireMock.anyUrl())
+                .willReturn(ok()
+                        .withUniformRandomDelay(6000,10000)));
+
+        //then
+        assertThrows(MovieErrorResponse.class, () -> moviesRestClient.retrieveAllMovies());
+
+    }
+
 
 }

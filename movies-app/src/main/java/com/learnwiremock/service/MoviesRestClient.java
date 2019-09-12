@@ -29,16 +29,18 @@ public class MoviesRestClient {
     public List<Movie> retrieveAllMovies() {
         List<Movie> movieList;
         try {
+            log.info("Inside retrieve all movies");
             movieList = webClient.get().uri(GET_ALL_MOVIES_V1)
                     .retrieve() // actual call is made to the api
                     .bodyToFlux(Movie.class) //body is converted to flux(Represents multiple items)
                     .collectList() // collecting the httpResponse as a list\
                     .block(); // This call makes the Webclient to behave as a synchronous client.
+            log.info("after the call");
         } catch (WebClientResponseException ex) {
             log.error("WebClientResponseException - Error Message is : {} ", ex, ex.getResponseBodyAsString());
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
-            log.error("Exception - The Error Message is {} and exception is ", ex.getMessage()+ ex);
+            log.error("Exception - The Error Message is {} and exception is ", ex.getMessage() + ex);
             throw new MovieErrorResponse(ex.getMessage(), ex);
         }
         return movieList;
