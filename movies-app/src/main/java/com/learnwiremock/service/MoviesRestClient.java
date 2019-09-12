@@ -38,8 +38,8 @@ public class MoviesRestClient {
             log.error("WebClientResponseException - Error Message is : {} ", ex, ex.getResponseBodyAsString());
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
-            log.error("Exception - The Error Message is {} ", ex.getMessage());
-            throw new MovieErrorResponse(ex);
+            log.error("Exception - The Error Message is {} and exception is ", ex.getMessage()+ ex);
+            throw new MovieErrorResponse(ex.getMessage(), ex);
         }
         return movieList;
     }
@@ -191,14 +191,12 @@ public class MoviesRestClient {
                     .bodyToMono(Void.class)
                     .block();
         }catch (WebClientResponseException ex) {
-            log.error("WebClientResponseException - Error Message is : {}", ex, ex.getResponseBodyAsString());
+            log.error("WebClientResponseException - The Status code is {} and the Error Message is : {}", ex.getRawStatusCode(), ex.getResponseBodyAsString());
             throw new MovieErrorResponse(ex.getStatusText(), ex);
         } catch (Exception ex) {
             log.error("Exception - The Error Message is {} ", ex.getMessage());
             throw new MovieErrorResponse(ex);
         }
-
         return "Movie Deleted SuccessFully";
-
     }
 }
