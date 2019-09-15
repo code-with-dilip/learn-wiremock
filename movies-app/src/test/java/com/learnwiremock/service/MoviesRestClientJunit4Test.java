@@ -3,9 +3,11 @@ package com.learnwiremock.service;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.learnwiremock.dto.Movie;
+import com.learnwiremock.exception.MovieErrorResponse;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +20,7 @@ import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_NAME_QUERY_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MoviesRestClientTestV2 {
+public class MoviesRestClientJunit4Test {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
@@ -72,6 +74,21 @@ public class MoviesRestClientTestV2 {
         String expectedCastName = "Robert Downey Jr, Chris Evans , Chris HemsWorth";
         assertEquals(4, movieList.size());
         assertEquals(expectedCastName, movieList.get(0).getCast());
+    }
+
+    @Test(expected = MovieErrorResponse.class)
+    public void retrieveMovieById_NotFound() {
+        //given
+        Integer movieId = 100;
+        stubFor(get(urlPathMatching("/movieservice/v1/movie/([0-9]+)"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HttpStatus.NOT_FOUND.value())
+                        .withBodyFile("404-movieId.json")));
+
+
+        //when
+         moviesRestClient.retrieveMovieById(movieId);
+
     }
 
 }

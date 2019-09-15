@@ -15,7 +15,7 @@ repositories {
 }
 
 test{
-    useJUnitPlatform()
+   // useJUnitPlatform()
 }
 
 dependencies {
@@ -36,7 +36,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.9'
 
     //junit5-dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.1")
+   testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.1")
 
     //wiremock
     testImplementation "com.github.tomakehurst:wiremock-jre8-standalone:2.24.1"
