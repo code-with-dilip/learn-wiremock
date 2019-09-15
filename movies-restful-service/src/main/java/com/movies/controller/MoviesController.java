@@ -14,17 +14,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @RestController
 @Slf4j
 @Api(value = "Movie End Points", description = "Displays all the end points in for the Movies RESTFUl Service API")
 public class MoviesController {
+
+    Function<Long, ResponseStatusException> notFoundId = (id) -> {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "No Movie Available with the given Id - "+ id);
+    };
+
+    Function<String,ResponseStatusException > notFoundName = (name) -> {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Movie Available with the given name - "+ name);
+    };
+
+    Function<Integer,ResponseStatusException > notFoundYear = (id) -> {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Movie Available with the given year - "+ id);
+    };
+
+
+    Supplier<ResponseStatusException > serverError = () -> {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "RunTimeException from Movie Service");
+    };
+
 
     @Autowired
     MoviesRepository moviesRepository;
@@ -66,7 +87,7 @@ public class MoviesController {
             return ResponseEntity.status(HttpStatus.OK).body(movieOptional.get());
         } else {
             log.info("No Movie available for the given Movie Id - {}.", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw notFoundId.apply(id);
         }
 
     }
@@ -86,7 +107,8 @@ public class MoviesController {
         List<Movie> movies = moviesRepository.findByMovieName(name);
         if (CollectionUtils.isEmpty(movies)) {
             log.info("No Movie available for the given Movie name - {}.", name);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw notFoundName.apply(name);
+
         } else {
             log.info("Response is : {}", movies);
             return ResponseEntity.status(HttpStatus.OK).body(movies);
@@ -109,7 +131,7 @@ public class MoviesController {
         List<Movie> movies = moviesRepository.findByYear(year);
         if (CollectionUtils.isEmpty(movies)) {
             log.info("No Movie available for the given Movie Year - {}.", year);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw notFoundYear.apply(year);
         } else {
             log.info("Response is : {}", movies);
             return ResponseEntity.status(HttpStatus.OK).body(movies);
@@ -153,7 +175,7 @@ public class MoviesController {
             return ResponseEntity.status(HttpStatus.OK).body(movieToUpdate);
         } else {
             log.info("No Movie available for the given Movie Id - {}.", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw notFoundId.apply(id);
         }
     }
 
@@ -164,6 +186,7 @@ public class MoviesController {
                     @ApiResponse(code = 404, message = "No movie found for the year that's passed."),
             }
     )
+
     @DeleteMapping(MoviesConstants.MOVIE_BY_ID_PATH_PARAM_V1)
     public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
 
@@ -175,9 +198,22 @@ public class MoviesController {
             return ResponseEntity.status(HttpStatus.OK).body(MoviesConstants.DELETE_MESSAGE);
         } else {
             log.info("No Movie available for the given Movie Id - {}.", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            throw notFoundId.apply(id);
         }
 
+
+    }
+
+    @DeleteMapping(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1)
+    public ResponseEntity<?> deleteMovieByName(@PathVariable String name) {
+        log.info("Received the request to delete a movie and the id is {} .", name);
+        log.info("Movie " + moviesRepository.findMovieByName(name));
+        if(CollectionUtils.isEmpty(moviesRepository.findMovieByName(name))){
+            throw notFoundName.apply(name);
+        }else{
+            moviesRepository.deleteByName(name);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
 
     }
 
