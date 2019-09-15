@@ -44,11 +44,15 @@ class MoviesRestClientTest {
 
     @BeforeEach
     void setUp() {
-        //int port = 8081;
+       // int port = 8081;
+        int appPort = 8081;
         int port = wireMockServer.port();
         final String baseUrl = String.format("http://localhost:%s/", port);
+        final String wireMockProxyUrl = String.format("http://localhost:%s/", appPort);
         webClient = WebClient.create(baseUrl);
         moviesRestClient = new MoviesRestClient(webClient);
+
+        stubFor(any(anyUrl()).willReturn(aResponse().proxiedFrom(wireMockProxyUrl))); //give the app port
 
     }
 
@@ -522,6 +526,27 @@ class MoviesRestClientTest {
         /*verify(exactly(1), postRequestedFor(urlPathEqualTo(ADD_MOVIE_V1))
                 .withRequestBody(matchingJsonPath("$.name", equalTo("Toy Story 5"))));
         verify(exactly(1), deleteRequestedFor((urlPathMatching("/movieservice/v1/movieName/.*"))));*/
+
+    }
+
+    //@Test
+    void deleteMovieByName_usingSelectiveProxy() {
+
+        //given
+        stubFor(delete(urlPathMatching("/movieservice/v1/movieName/.*"))
+                .willReturn(WireMock.ok()));
+
+        String toyStoryCrew = "Tom Hanks, Tim Allen";
+        Movie toyStory = new Movie(null, "Toy Story 5", 2019, toyStoryCrew, LocalDate.of(2019, 06, 20));
+        Movie movie = moviesRestClient.addNewMovie(toyStory);
+
+        //when
+        String responseMessage = moviesRestClient.deleteMovieByName(movie.getName());
+
+        //then
+        assertEquals("Movie Deleted SuccessFully", responseMessage);
+
+        verify(deleteRequestedFor((urlPathMatching("/movieservice/v1/movieName/.*"))));
 
     }
 

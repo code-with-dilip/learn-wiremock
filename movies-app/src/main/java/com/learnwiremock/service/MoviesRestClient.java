@@ -127,7 +127,9 @@ public class MoviesRestClient {
     public Movie addNewMovie(Movie newMovie) {
         Movie movie;
         try {
+           // String token  = retrieveToken();
             movie = webClient.post().uri( ADD_MOVIE_V1)
+                    //.header("token", token)
                     .syncBody(newMovie)
                     .retrieve()
                     .bodyToMono(Movie.class)
@@ -141,6 +143,19 @@ public class MoviesRestClient {
             throw new MovieErrorResponse(ex);
         }
         return movie;
+    }
+
+    private String retrieveToken() {
+
+        try {
+            return webClient.get().uri(RETRIEVE_TOKEN)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        }catch (Exception ex){
+            log.error("Exception - The Error Message is {} ", ex.getMessage()+ex);
+            throw ex;
+        }
     }
 
     public Movie updateMovie(Integer movieId, Movie movie) {
