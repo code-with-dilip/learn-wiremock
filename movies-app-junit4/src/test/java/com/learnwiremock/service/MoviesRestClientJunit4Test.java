@@ -1,6 +1,9 @@
 package com.learnwiremock.service;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
+import com.github.tomakehurst.wiremock.core.Options;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
@@ -15,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.learnwiremock.constants.MovieAppConstants.MOVIE_BY_NAME_QUERY_PARAM_V1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -23,6 +27,12 @@ public class MoviesRestClientJunit4Test {
 
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
+
+    Options options = wireMockConfig()
+            .port(8088)
+            .notifier(new ConsoleNotifier(true))
+            .extensions(new ResponseTemplateTransformer(true));
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8088);
 
