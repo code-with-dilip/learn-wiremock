@@ -33,14 +33,17 @@ class MoviesRestClientTest {
     MoviesRestClient moviesRestClient = null;
     WebClient webClient;
 
-    @InjectServer
-    WireMockServer wireMockServer;
 
     @ConfigureWireMock
     Options options = wireMockConfig()
             .port(8088)
             .notifier(new ConsoleNotifier(true))
             .extensions(new ResponseTemplateTransformer(true));
+
+
+    @InjectServer
+    WireMockServer wireMockServer;
+
 
     @BeforeEach
     void setUp() {
