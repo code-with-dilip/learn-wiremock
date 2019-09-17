@@ -14,10 +14,6 @@ repositories {
 
 }
 
-test{
-   // useJUnitPlatform()
-}
-
 dependencies {
     //webclient-dependencies
     implementation 'org.springframework:spring-webflux:5.1.8.RELEASE'
@@ -35,12 +31,13 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.9'
     implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.9'
 
-    //junit5-dependencies
-   testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.1")
+    //junit4-dependencies
+    testImplementation "junit:junit:4.12"
+
 
     //wiremock
     testImplementation "com.github.tomakehurst:wiremock-jre8-standalone:2.24.1"
-    implementation "com.github.JensPiegsa:wiremock-extension:0.4.0"
+
 
 
 }
