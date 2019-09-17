@@ -204,7 +204,7 @@ public class MoviesController {
 
     }
 
-    @DeleteMapping(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1)
+   // @DeleteMapping(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1)
     public ResponseEntity<?> deleteMovieByName(@PathVariable String name) {
         log.info("Received the request to delete a movie and the id is {} .", name);
         log.info("Movie " + moviesRepository.findMovieByName(name));

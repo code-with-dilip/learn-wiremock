@@ -8,4 +8,5 @@ public class MovieAppConstants {
     public static final String MOVIE_BY_NAME_QUERY_PARAM_V1 = "/movieservice/v1/movieName";
     public static final String MOVIE_BY_YEAR_QUERY_PARAM_V1 = "/movieservice/v1/movieYear";
     public static final String ADD_MOVIE_V1 =  "/movieservice/v1/movie";
+    public static final String RETRIEVE_TOKEN =  "/token/v1/fetchToken";
 }

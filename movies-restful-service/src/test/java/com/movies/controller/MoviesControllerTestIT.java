@@ -279,7 +279,7 @@ public class MoviesControllerTestIT {
                 .expectStatus().isNotFound();
     }
 
-    @Test
+   // @Test
     void deleteMovieByName() {
 
         webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1), "DarK Knight")
@@ -288,7 +288,7 @@ public class MoviesControllerTestIT {
                 .expectBody(Void.class);
     }
 
-    @Test
+    //@Test
     void deleteMovieByName_invalid_movie_name() {
 
         webTestClient.delete().uri(contextPath.concat(MoviesConstants.MOVIE_BY_NAME_PATH_PARAM_V1), "DarK Knight1")
