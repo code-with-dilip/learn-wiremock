@@ -95,7 +95,6 @@ public class MoviesRestClientTest {
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("movie.json")));
 
-
         //given
         Integer movieId = 1;
 
@@ -166,7 +165,6 @@ public class MoviesRestClientTest {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HttpStatus.NOT_FOUND.value())
                         .withBodyFile("404-movieId.json")));
-
 
         //when
         moviesRestClient.retrieveMovieById(movieId);
