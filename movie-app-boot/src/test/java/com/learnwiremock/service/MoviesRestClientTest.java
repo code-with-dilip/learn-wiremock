@@ -1,3 +1,4 @@
+/*
 package com.learnwiremock.service;
 
 import com.github.jenspiegsa.wiremockextension.ConfigureWireMock;
@@ -8,7 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
-
+import com.learnwiremock.constants.MoviesAppConstants;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import org.junit.jupiter.api.Assertions;
@@ -19,22 +20,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
 import java.time.LocalDate;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-
+import static com.learnwiremock.constants.MoviesAppConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(WireMockExtension.class)
 public class MoviesRestClientTest {
 
-       MoviesRestClient moviesRestClient;
+    MoviesRestClient moviesRestClient;
     WebClient webClient;
 
     @InjectServer
@@ -438,3 +436,4 @@ public class MoviesRestClientTest {
     }
 }
 
+*/
