@@ -22,9 +22,6 @@ public class MoviesRestClient {
     @Autowired
     private WebClient webClient;
 
-    /*public MoviesRestClient(WebClient _webClient) {
-        this.webClient = _webClient;
-    }*/
 
     /**
      * Retrieve all the movies from the service.
