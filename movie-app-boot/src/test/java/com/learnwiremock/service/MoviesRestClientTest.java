@@ -37,8 +37,8 @@ import com.learnwiremock.constants.MoviesAppConstants.*;
 public class MoviesRestClientTest {
 
 
-    MoviesRestClient moviesRestClient = null;
-    WebClient webClient;
+    @Autowired
+    MoviesRestClient moviesRestClient;
 
     Options options = wireMockConfig()
             .port(8088)
@@ -53,8 +53,6 @@ public class MoviesRestClientTest {
         //wireMockServer = new WireMockServer(options);
         int port = wireMockServer.port();
         final String baseUrl = String.format("http://localhost:%s/", port);
-        webClient = WebClient.create(baseUrl);
-        moviesRestClient = new MoviesRestClient(webClient);
     }
 
     @Test

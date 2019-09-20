@@ -3,6 +3,8 @@ package com.learnwiremock.service;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -12,14 +14,17 @@ import java.util.List;
 
 import static com.learnwiremock.constants.MoviesAppConstants.*;
 
+
 @Slf4j
+@Component
 public class MoviesRestClient {
 
+    @Autowired
     private WebClient webClient;
 
-    public MoviesRestClient(WebClient _webClient) {
+    /*public MoviesRestClient(WebClient _webClient) {
         this.webClient = _webClient;
-    }
+    }*/
 
     /**
      * Retrieve all the movies from the service.
