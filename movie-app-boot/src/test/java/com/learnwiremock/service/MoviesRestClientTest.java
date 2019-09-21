@@ -43,17 +43,6 @@ public class MoviesRestClientTest {
     @Autowired
     MoviesRestClient moviesRestClient;
 
-    @Autowired
-    WireMockServer wireMockServer;
-
-    @Before
-    public void setUp() {
-        //int port = 8081;
-        //wireMockServer = new WireMockServer(options);
-        int port = wireMockServer.port();
-        final String baseUrl = String.format("http://localhost:%s/", port);
-    }
-
     @Test
     public void getAllMovies() {
 
