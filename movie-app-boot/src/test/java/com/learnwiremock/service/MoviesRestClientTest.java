@@ -43,10 +43,6 @@ public class MoviesRestClientTest {
     @Autowired
     MoviesRestClient moviesRestClient;
 
-    Options options = wireMockConfig()
-            .port(8088)
-            .extensions(new ResponseTemplateTransformer(true));
-
     @Autowired
     WireMockServer wireMockServer;
 
