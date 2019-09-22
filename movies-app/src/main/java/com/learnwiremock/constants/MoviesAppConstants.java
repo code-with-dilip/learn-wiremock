@@ -1,6 +1,6 @@
 package com.learnwiremock.constants;
 
-public class MovieAppConstants {
+public class MoviesAppConstants {
 
     public final static String GET_ALL_MOVIES_V1 = "/movieservice/v1/allMovies";
     public static final String MOVIE_BY_ID_PATH_PARAM_V1 = "/movieservice/v1/movie/{id}";

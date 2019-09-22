@@ -7,10 +7,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 
-import static com.learnwiremock.constants.MovieAppConstants.*;
+import static com.learnwiremock.constants.MoviesAppConstants.*;
 
 @Slf4j
 public class MoviesRestClient {
