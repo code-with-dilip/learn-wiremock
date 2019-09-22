@@ -52,7 +52,7 @@ public class MoviesRestClientTest {
         webClient = WebClient.create(baseUrl);
         moviesRestClient = new MoviesRestClient(webClient);
 
-        stubFor(any(anyUrl()).willReturn(aResponse().proxiedFrom("http://localhost:8081")));
+       // stubFor(any(anyUrl()).willReturn(aResponse().proxiedFrom("http://localhost:8081")));
     }
 
     @Test
@@ -279,7 +279,7 @@ public class MoviesRestClientTest {
                         .withBodyFile("add-movie.json")));
 
         //when
-        Movie addedMovie = moviesRestClient.addNewMovie(movie);
+        Movie addedMovie = moviesRestClient.addMovie(movie);
         System.out.println(addedMovie);
 
         //then
@@ -300,7 +300,7 @@ public class MoviesRestClientTest {
                         .withBodyFile("add-movie-template.json")));
 
         //when
-        Movie addedMovie = moviesRestClient.addNewMovie(movie);
+        Movie addedMovie = moviesRestClient.addMovie(movie);
         System.out.println(addedMovie);
 
         //then
@@ -320,7 +320,7 @@ public class MoviesRestClientTest {
 
         //when
         String expectedErrorMessage = "Please pass all the input fields : [name]";
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.addNewMovie(movie), expectedErrorMessage);
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.addMovie(movie), expectedErrorMessage);
     }
 
     @Test
@@ -372,7 +372,7 @@ public class MoviesRestClientTest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("add-movie-template.json")));
-        Movie addedMovie = moviesRestClient.addNewMovie(movie);
+        Movie addedMovie = moviesRestClient.addMovie(movie);
 
         String expectedErrorMessage = "Movie Deleted Successfully";
         stubFor(delete(urlPathMatching("/movieservice/v1/movie/[0-9]+"))
@@ -382,7 +382,7 @@ public class MoviesRestClientTest {
                         .withBody(expectedErrorMessage)));
 
         //when
-        String responseMessage = moviesRestClient.deleteMovieById(addedMovie.getMovie_id().intValue());
+        String responseMessage = moviesRestClient.deleteMovie(addedMovie.getMovie_id().intValue());
 
         //then
         assertEquals(expectedErrorMessage, responseMessage);
@@ -398,7 +398,7 @@ public class MoviesRestClientTest {
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
 
         //then
-        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.deleteMovieById(id));
+        Assertions.assertThrows(MovieErrorResponse.class, () -> moviesRestClient.deleteMovie(id));
 
     }
 
@@ -415,7 +415,7 @@ public class MoviesRestClientTest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBodyFile("add-movie-template.json")));
-        Movie addedMovie = moviesRestClient.addNewMovie(movie);
+        Movie addedMovie = moviesRestClient.addMovie(movie);
 
         String expectedErrorMessage = "Movie Deleted Successfully";
         stubFor(delete(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name=Toys%20Story%205"))
@@ -441,7 +441,7 @@ public class MoviesRestClientTest {
     void deleteMovieByName_selectiveproxying() {
         //given
         Movie movie = new Movie(null, "Toys Story 5", "Tom Hanks, Tim Allen", 2019, LocalDate.of(2019, 06, 20));
-        Movie addedMovie = moviesRestClient.addNewMovie(movie);
+        Movie addedMovie = moviesRestClient.addMovie(movie);
 
         String expectedErrorMessage = "Movie Deleted Successfully";
         stubFor(delete(urlEqualTo(MOVIE_BY_NAME_QUERY_PARAM_V1+"?movie_name=Toys%20Story%205"))

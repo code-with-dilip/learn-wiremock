@@ -1,5 +1,6 @@
 package com.learnwiremock.service;
 
+import com.learnwiremock.constants.MoviesAppConstants;
 import com.learnwiremock.dto.Movie;
 import com.learnwiremock.exception.MovieErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -123,7 +124,7 @@ public class MoviesRestClient {
      * @param newMovie
      * @return
      */
-    public Movie addNewMovie(Movie newMovie) {
+    public Movie addMovie(Movie newMovie) {
         Movie movie;
         try {
            // String token  = retrieveToken();
@@ -178,7 +179,7 @@ public class MoviesRestClient {
         return updatedMovie;
     }
 
-    public String deleteMovieById(Integer movieId) {
+    public String deleteMovie(Integer movieId) {
 
        String response;
         try {
@@ -200,9 +201,13 @@ public class MoviesRestClient {
 
     public String deleteMovieByName(String movieName) {
 
+        String deleteMovieByNameURI = UriComponentsBuilder.fromUriString(MoviesAppConstants.MOVIE_BY_NAME_QUERY_PARAM_V1)
+                .queryParam("movie_name", movieName)
+                .buildAndExpand()
+                .toUriString();
 
         try {
-            webClient.delete().uri( MOVIE_BY_NAME_PATH_PARAM_V1, movieName)
+            webClient.delete().uri(deleteMovieByNameURI)
                     .retrieve()
                     .bodyToMono(Void.class)
                     .block();
@@ -213,6 +218,6 @@ public class MoviesRestClient {
             log.error("Exception - The Error Message is {} ", ex.getMessage());
             throw new MovieErrorResponse(ex);
         }
-        return "Movie Deleted SuccessFully";
+        return "Movie Deleted Successfully";
     }
 }
