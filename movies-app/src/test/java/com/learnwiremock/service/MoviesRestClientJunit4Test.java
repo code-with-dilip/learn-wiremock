@@ -32,8 +32,6 @@ public class MoviesRestClientJunit4Test {
     MoviesRestClient moviesRestClient;
     WebClient webClient;
 
-
-
     Options options = wireMockConfig().
             port(8088)
             .notifier(new ConsoleNotifier(true))
