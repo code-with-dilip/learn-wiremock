@@ -35,28 +35,13 @@ import com.learnwiremock.constants.MoviesAppConstants.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureWireMock(port = 8088)
-@TestPropertySource(properties= {"movieapp.baseUrl=http://localhost:8088"})
+@AutoConfigureWireMock(port = 8087)
+@TestPropertySource(properties= {"movieapp.baseUrl=http://localhost:8087"})
 public class MoviesRestClientTest {
 
 
     @Autowired
     MoviesRestClient moviesRestClient;
-
-    Options options = wireMockConfig()
-            .port(8088)
-            .extensions(new ResponseTemplateTransformer(true));
-
-    @Autowired
-    WireMockServer wireMockServer;
-
-    @Before
-    public void setUp() {
-        //int port = 8081;
-        //wireMockServer = new WireMockServer(options);
-        int port = wireMockServer.port();
-        final String baseUrl = String.format("http://localhost:%s/", port);
-    }
 
     @Test
     public void getAllMovies() {
