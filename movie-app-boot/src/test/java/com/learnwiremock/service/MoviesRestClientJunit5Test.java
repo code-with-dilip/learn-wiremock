@@ -34,8 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@AutoConfigureWireMock(port = 8088)
-@TestPropertySource(properties= {"movieapp.baseUrl=http://localhost:8088"})
+@AutoConfigureWireMock(port = 8090)
+@TestPropertySource(properties= {"movieapp.baseUrl=http://localhost:8090"})
 class MoviesRestClientJunit5Test {
 
     @Autowired

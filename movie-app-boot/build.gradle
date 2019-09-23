@@ -33,15 +33,13 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
     testCompileOnly 'junit:junit:4.12'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.5.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-engine:1.5.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-commons:1.5.1'
+
 
     //wiremock
     testImplementation "org.springframework.cloud:spring-cloud-contract-wiremock:2.1.3.RELEASE"
     testImplementation "com.github.tomakehurst:wiremock-jre8-standalone:2.24.1"
-
-
-
-
-
-
+    implementation "com.github.JensPiegsa:wiremock-extension:0.4.0"
 
 }
