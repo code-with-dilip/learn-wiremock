@@ -10,6 +10,7 @@ public class MoviesConstants {
     public static final String MOVIE_BY_NAME_QUERY_PARAM_V1 = "/v1/movieName";
     public static final String MOVIE_BY_YEAR_QUERY_PARAM_V1 = "/v1/movieYear";
     public static final String ADD_MOVIE_V1 =  "/v1/movie";
+    public static final String ADD_MOVIE_XML_V1 =  "/v1/xml/movie";
     public static final String DELETE_MESSAGE ="Movie Deleted Successfully";
 
     public static final String ERROR_MESSAGE = "Please pass all the input fields : ";

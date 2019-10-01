@@ -3,8 +3,10 @@ package com.movies.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.movies.constants.MoviesConstants;
 import com.movies.entity.Movie;
+import com.movies.entity.MovieXML;
 import com.movies.helper.TestHelper;
 import com.movies.repositry.MoviesRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -305,6 +307,27 @@ public class MoviesControllerTestIT {
         String data = lines.collect(Collectors.joining("\n"));
         return data;
 
+    }
+
+    @Test
+    void createMovie_xml() throws JsonProcessingException {
+
+        //given
+        String batmanBeginsCrew = "Christian Bale, Liam Neesan";
+        MovieXML newMovie = new MovieXML(null, "Batman Begins", 2008, batmanBeginsCrew, LocalDate.of(2018, 02, 02));
+        String xml = new XmlMapper().writeValueAsString(newMovie);
+        System.out.println("xml : " + xml);
+
+        //when
+        webTestClient.post().uri(contextPath.concat(MoviesConstants.ADD_MOVIE_XML_V1))
+                .contentType(MediaType.APPLICATION_XML)
+                .syncBody(xml)
+               // .body(Mono.just(newMovie), MovieXML.class)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.movie_id").isNotEmpty()
+                .jsonPath("$.year", 2008);
     }
 
 }

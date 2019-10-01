@@ -2,7 +2,9 @@ package com.movies.controller;
 
 import com.movies.constants.MoviesConstants;
 import com.movies.entity.Movie;
+import com.movies.entity.MovieXML;
 import com.movies.repositry.MoviesRepository;
+import com.movies.repositry.MoviesXMLRepository;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -49,6 +52,9 @@ public class MoviesController {
 
     @Autowired
     MoviesRepository moviesRepository;
+
+    @Autowired
+    MoviesXMLRepository moviesXMLRepository;
 
     @GetMapping(MoviesConstants.GET_ALL_MOVIES_V1)
     @ApiOperation("Retrieves all the Movies")
@@ -154,6 +160,8 @@ public class MoviesController {
 
     }
 
+
+
     @ApiOperation("Updates the movie details.")
     @ApiResponses(
             value = {
@@ -237,6 +245,22 @@ public class MoviesController {
 
     private boolean checkEmptyNullString(String input) {
         return !StringUtils.isEmpty(input) && !StringUtils.isEmpty(input.trim());
+    }
+
+    @ApiOperation("Adds a new movie.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(code = 201, message = "Movie Successfully added to the DB.")
+            }
+    )
+    @PostMapping(value = MoviesConstants.ADD_MOVIE_XML_V1,consumes = MediaType.APPLICATION_XML_VALUE)
+    public ResponseEntity<?> createMovieXML(@Valid @RequestBody MovieXML movie) {
+
+        log.info("Received the request to add a new Movie in the service {} ", movie);
+        MovieXML addedMovie = moviesXMLRepository.save(movie);
+        log.info("Movie SuccessFully added to the DB. New Movie Details are - .", movie);
+        return ResponseEntity.status(HttpStatus.CREATED).body(addedMovie);
+
     }
 
 
